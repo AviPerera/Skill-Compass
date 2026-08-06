@@ -8,7 +8,13 @@ version = "0.1.0"
 description = "Australian Data Analytics Skills Insights"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "pydantic>=2.11,<3",
+    "pyyaml>=6,<7",
+]
+
+[project.scripts]
+skill-compass = "skill_compass.cli:main"
 
 [dependency-groups]
 dev = [

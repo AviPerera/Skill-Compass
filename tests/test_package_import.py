@@ -1,3 +1,5 @@
+"""Package smoke tests for public metadata, not feature behaviour."""
+
 import skill_compass
 
 

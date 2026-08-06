@@ -1,0 +1,249 @@
+source_code: apify_seek_current
+mapping_name: Apify SEEK current CSV export
+mapping_version: 0.1.0
+canonical_schema_version: 0.1.0
+
+input_format:
+  encoding: utf-8-sig
+  delimiter: ","
+  quotechar: '"'
+  doublequote: true
+
+fields:
+  source_job_id:
+    preferred: [id]
+    fallbacks:
+      - raw/detail/id
+      - raw/listing/id
+      - raw/listing/solMetadata/jobId
+    required: true
+    transformer: text
+    note: External identifiers remain strings.
+
+  title_raw:
+    preferred: [title]
+    fallbacks:
+      - raw/detail/title
+      - raw/listing/title
+    required: true
+    transformer: text
+
+  job_url:
+    preferred: [job_url]
+    required: true
+    transformer: text
+
+  scraped_at_raw:
+    preferred: [scraped_at]
+    transformer: text
+
+  company_name_raw:
+    preferred: [company_name]
+    fallbacks:
+      - raw/listing/companyName
+    transformer: text
+    note: Advertiser names are intentionally not company fallbacks.
+
+  advertiser_name_raw:
+    preferred: [advertiser_name]
+    fallbacks:
+      - raw/detail/advertiser/name
+      - raw/listing/advertiser/description
+    transformer: text
+
+  employer_name_raw:
+    preferred: [raw/listing/employer/name]
+    transformer: text
+
+  summary_text_raw:
+    preferred: [abstract]
+    fallbacks:
+      - raw/detail/abstract
+      - teaser
+      - raw/listing/teaser
+    transformer: text
+
+  bullet_points_raw:
+    preferred:
+      - bullet_points/0
+      - bullet_points/1
+      - bullet_points/2
+    fallbacks:
+      - raw/listing/bulletPoints/0
+      - raw/listing/bulletPoints/1
+      - raw/listing/bulletPoints/2
+    transformer: collect_text
+
+  description_html_raw:
+    preferred: [description_html]
+    fallbacks:
+      - raw/detail/content
+    transformer: text
+
+  description_text_raw:
+    preferred: [description_text]
+    transformer: text
+
+  source_role_code_raw:
+    preferred: [role_id]
+    fallbacks:
+      - raw/listing/roleId
+    transformer: text
+
+  classification_raw:
+    preferred: [classification]
+    fallbacks:
+      - raw/listing/classifications/0/classification/description
+    transformer: text
+
+  classification_code_raw:
+    preferred: [classification_id]
+    fallbacks:
+      - raw/listing/classifications/0/classification/id
+    transformer: text
+
+  subclassification_raw:
+    preferred: [subclassification]
+    fallbacks:
+      - raw/listing/classifications/0/subclassification/description
+    transformer: text
+
+  subclassification_code_raw:
+    preferred: [subclassification_id]
+    fallbacks:
+      - raw/listing/classifications/0/subclassification/id
+    transformer: text
+
+  location_raw:
+    preferred: [location]
+    fallbacks:
+      - raw/detail/location/label
+      - raw/listing/locations/0/label
+    transformer: text
+
+  location_long_raw:
+    preferred: [location_long]
+    fallbacks:
+      - raw/listing/locations/0/label
+    transformer: text
+
+  country_raw:
+    preferred: [country]
+    transformer: text
+
+  country_code_raw:
+    preferred: [country_code]
+    fallbacks:
+      - raw/listing/locations/0/countryCode
+    transformer: text
+
+  area_hierarchy_raw:
+    preferred:
+      - area_hierarchy/0
+      - area_hierarchy/1
+    fallbacks:
+      - raw/listing/locations/0/seoHierarchy/0/contextualName
+      - raw/listing/locations/0/seoHierarchy/1/contextualName
+    transformer: collect_text
+
+  work_type_raw:
+    preferred: [work_type]
+    fallbacks:
+      - raw/detail/workTypes/label
+      - raw/listing/workTypes/0
+    transformer: text
+
+  work_types_raw:
+    preferred:
+      - work_types/0
+      - work_types/1
+    fallbacks:
+      - raw/listing/workTypes/0
+      - raw/listing/workTypes/1
+    transformer: collect_text
+
+  work_arrangement_raw:
+    preferred: [work_arrangements/0]
+    fallbacks:
+      - raw/listing/workArrangements/data/0/label/text
+      - raw/listing/workArrangements/displayText
+    transformer: text
+
+  is_remote_raw:
+    preferred: [is_remote]
+    transformer: boolean
+
+  salary_label_raw:
+    preferred: [salary_label]
+    fallbacks:
+      - raw/detail/salary/label
+      - raw/listing/salaryLabel
+    transformer: text
+
+  salary_min_raw:
+    preferred: [salary_min]
+    transformer: decimal
+
+  salary_max_raw:
+    preferred: [salary_max]
+    transformer: decimal
+
+  salary_currency_raw:
+    preferred: [salary_currency]
+    transformer: text
+
+  salary_period_raw:
+    preferred: [salary_period]
+    transformer: text
+
+  listing_date_raw:
+    preferred: [listing_date]
+    fallbacks:
+      - raw/detail/listedAt/dateTimeUtc
+      - raw/listing/listingDate
+      - listing_date_display
+      - raw/listing/listingDateDisplay
+    transformer: text
+
+  expires_at_raw:
+    preferred: [expires_at]
+    fallbacks:
+      - raw/detail/expiresAt/dateTimeUtc
+    transformer: text
+
+  is_expired_raw:
+    preferred: [is_expired]
+    fallbacks:
+      - raw/detail/isExpired
+    transformer: boolean
+
+  is_featured_raw:
+    preferred: [is_featured]
+    fallbacks:
+      - raw/listing/isFeatured
+    transformer: boolean
+
+excluded_fields:
+  - contact_email
+  - contact_phone
+  - raw/detail/phoneNumber
+  - raw/detail/contactMatches/0/type
+  - raw/detail/contactMatches/0/value
+  - raw/detail/contactMatches/1/type
+  - raw/detail/contactMatches/1/value
+  - raw/detail/contactMatches/2/type
+  - raw/detail/contactMatches/2/value
+  - raw/listing/solMetadata/searchRequestToken
+  - raw/listing/solMetadata/token
+  - raw/listing/tracking
+
+excluded_field_patterns:
+  - '(?i)(?:^|/)(?:contact|phone|email)'
+  - '(?i)(?:searchrequesttoken|tracking|credential)'
+  - '(?i)(?:^|/)token$'
+  - '(?i)(?:telemetry|solmetadata/tags/)'
+
+notes:
+  - Only declared canonical fields are emitted by the mapping service.
+  - Contact, credential and tracking values are never copied to typed outputs.
+  - Executable YAML expressions and unregistered transformers are prohibited.

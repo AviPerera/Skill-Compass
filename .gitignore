@@ -1,0 +1,262 @@
+# ==========================================================
+# Skill Compass
+# Local environments, private data and generated artifacts
+# ==========================================================
+
+
+# ----------------------------------------------------------
+# Python environments
+# ----------------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+
+
+# ----------------------------------------------------------
+# Python cache and compiled files
+# ----------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.so
+
+
+# ----------------------------------------------------------
+# Python packaging and build outputs
+# ----------------------------------------------------------
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+pip-wheel-metadata/
+
+
+# ----------------------------------------------------------
+# Testing, linting, typing and coverage
+# ----------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pytype/
+.hypothesis/
+.tox/
+.nox/
+
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+pytest-report.xml
+junit.xml
+
+
+# ----------------------------------------------------------
+# Jupyter
+# ----------------------------------------------------------
+.ipynb_checkpoints/
+
+
+# ----------------------------------------------------------
+# Secrets and environment variables
+# ----------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+
+secrets/
+credentials/
+credentials.json
+
+
+# ----------------------------------------------------------
+# Private, raw and generated project data
+# ----------------------------------------------------------
+data/private/
+data/raw/
+data/bronze/
+data/silver/
+data/gold/
+data/processed/
+data/outputs/
+data/temp/
+data/tmp/
+
+demo_outputs/
+pipeline_outputs/
+exports/
+
+*apify_export*
+*apify_dataset*
+*raw_jobs*
+*raw_listings*
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# ----------------------------------------------------------
+# Local logs and temporary runtime files
+# ----------------------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+.cache/
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+
+# ----------------------------------------------------------
+# Local development instructions and tool configuration
+# ----------------------------------------------------------
+/AGENTS.md
+/CLAUDE.md
+/CODEX.md
+/GEMINI.md
+/AI_NOTES.md
+/AI_INSTRUCTIONS.md
+/COPILOT_INSTRUCTIONS.md
+
+/.codex/
+/.claude/
+/.cursor/
+/.continue/
+/.windsurf/
+/.aider/
+/.ai/
+
+.aider*
+*.chat
+*.chatlog
+*.conversation
+*.transcript
+*.prompt
+*.prompts
+*.prompt.txt
+*.prompt.md
+*.instructions.md
+
+.github/copilot-instructions.md
+
+COPY_INTO_REPOSITORY.md
+*Codex_Reference_Pack*
+*Claude_Reference_Pack*
+*AI_Reference_Pack*
+
+
+# ----------------------------------------------------------
+# Internal project reference documents
+#
+# The public README.md remains tracked.
+# Internal Markdown and source specifications remain local.
+# ----------------------------------------------------------
+/docs/
+
+*.doc
+*.docx
+*.pdf
+*.rtf
+*.odt
+
+*.ppt
+*.pptx
+*.pbit
+*.pbix
+
+*.xls
+*.xlsx
+*.xlsm
+*.xlsb
+
+
+# ----------------------------------------------------------
+# Power BI
+#
+# Ignore Power BI content by default, but retain the approved
+# synthetic workbook used for source-contract testing.
+# ----------------------------------------------------------
+powerbi/*
+
+!powerbi/reference/
+powerbi/reference/*
+
+!powerbi/reference/Skill_Compass_Final_Synthetic_PowerBI_Dataset_100_Jobs.xlsx
+
+
+# ----------------------------------------------------------
+# Microsoft Office temporary files
+# ----------------------------------------------------------
+~$*.doc
+~$*.docx
+~$*.xlsx
+~$*.xlsm
+~$*.ppt
+~$*.pptx
+
+
+# ----------------------------------------------------------
+# Visual Studio Code
+# ----------------------------------------------------------
+.vscode/*
+
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+
+# ----------------------------------------------------------
+# Other editors and IDEs
+# ----------------------------------------------------------
+.idea/
+*.code-workspace
+.spyproject/
+.spyderproject
+.ropeproject/
+
+
+# ----------------------------------------------------------
+# Operating-system files
+# ----------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+ehthumbs.db
+
+
+# ----------------------------------------------------------
+# Docker local overrides
+# ----------------------------------------------------------
+docker-compose.override.yml
+
+
+# ----------------------------------------------------------
+# Phase 3 frontend artifacts
+# ----------------------------------------------------------
+node_modules/
+.next/
+out/
+.nuxt/
+.svelte-kit/
+coverage/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

@@ -23,6 +23,21 @@ from skill_compass.mapping.errors import MappingConfigurationError
 from skill_compass.services.apify_connection_test import run_apify_connection_test
 from skill_compass.services.clean_csv import ReconciliationError, process_csv
 from skill_compass.services.extract_requirements import process_cleaned_csv
+from skill_compass.services.fetch_apify import (
+    DEFAULT_FETCH_OUTPUT_ROOT,
+    fetch_existing_apify_dataset,
+)
+from skill_compass.services.fetch_backfill import (
+    DEFAULT_BACKFILL_FETCH_ROOT,
+    DEFAULT_SEEK_COLLECTION_PATH,
+    run_fetch_backfill_command,
+)
+from skill_compass.services.full_collection import (
+    DEFAULT_ACTOR_CONFIG_PATH,
+    DEFAULT_FULL_COLLECTION_ROOT,
+    DEFAULT_SEARCH_SCOPES_PATH,
+    run_full_collection_command,
+)
 
 # =============================================================================
 # Command parsing and safe output
@@ -58,6 +73,68 @@ def build_parser() -> argparse.ArgumentParser:
         "--config",
         type=Path,
         default=Path("sources/apify_seek_current/collection.yaml"),
+    )
+
+    fetch_apify = subcommands.add_parser(
+        "fetch-apify",
+        help="fetch an existing Apify dataset without invoking an Actor",
+    )
+    fetch_identifier = fetch_apify.add_mutually_exclusive_group(required=True)
+    fetch_identifier.add_argument("--dataset-id")
+    fetch_identifier.add_argument("--run-id")
+    fetch_apify.add_argument(
+        "--config",
+        type=Path,
+        default=Path("sources/apify_seek_current/collection.yaml"),
+    )
+    fetch_apify.add_argument(
+        "--output-root",
+        type=Path,
+        default=DEFAULT_FETCH_OUTPUT_ROOT,
+    )
+
+    fetch_backfill = subcommands.add_parser(
+        "fetch-backfill",
+        help="fetch all existing national backfill datasets without an Actor",
+    )
+    fetch_backfill.add_argument("--manifest", type=Path, required=True)
+    fetch_backfill.add_argument("--dry-run", action="store_true")
+    fetch_backfill.add_argument("--force", action="store_true")
+    fetch_backfill.add_argument(
+        "--include-all-successful-runs",
+        action="store_true",
+        help="append datasets from all other successful runs of the configured Actor",
+    )
+    fetch_backfill.add_argument(
+        "--actor-config",
+        type=Path,
+        default=DEFAULT_SEEK_COLLECTION_PATH,
+        help="source configuration containing the approved Actor ID",
+    )
+    fetch_backfill.add_argument(
+        "--search-scopes", type=Path, default=DEFAULT_SEARCH_SCOPES_PATH
+    )
+    fetch_backfill.add_argument(
+        "--output-root", type=Path, default=DEFAULT_BACKFILL_FETCH_ROOT
+    )
+
+    collect_full = subcommands.add_parser(
+        "collect-full",
+        help="plan or explicitly execute the one-time national backfill",
+    )
+    collect_mode = collect_full.add_mutually_exclusive_group(required=True)
+    collect_mode.add_argument("--dry-run", action="store_true")
+    collect_mode.add_argument("--execute", action="store_true")
+    collect_full.add_argument("--resume", action="store_true")
+    collect_full.add_argument("--force", action="store_true")
+    collect_full.add_argument(
+        "--search-scopes", type=Path, default=DEFAULT_SEARCH_SCOPES_PATH
+    )
+    collect_full.add_argument(
+        "--actor-config", type=Path, default=DEFAULT_ACTOR_CONFIG_PATH
+    )
+    collect_full.add_argument(
+        "--output-root", type=Path, default=DEFAULT_FULL_COLLECTION_ROOT
     )
     return parser
 
@@ -153,6 +230,75 @@ def run_test_apify_connection(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def run_fetch_apify(arguments: argparse.Namespace) -> int:
+    """Fetch existing raw data and clearly report the no-Actor cost boundary."""
+    try:
+        result = fetch_existing_apify_dataset(
+            config_path=arguments.config,
+            dataset_id=arguments.dataset_id,
+            run_id=arguments.run_id,
+            output_root=arguments.output_root,
+        )
+    except (
+        ApifyCollectionError,
+        CollectionConfigurationError,
+        SeekCollectionConfigurationError,
+        OSError,
+        TypeError,
+        ValueError,
+    ) as error:
+        print(f"fetch-apify failed: {error}")
+        return 1
+
+    manifest = result.manifest
+    print("=" * 60)
+    print("SKILL COMPASS — EXISTING APIFY DATASET FETCH")
+    print("=" * 60)
+    print()
+    print("Actor invocation: NO")
+    print("Existing dataset fetch only")
+    if manifest.run_id is not None:
+        print(f"Run ID: {manifest.run_id}")
+    print(f"Dataset ID: {manifest.dataset_id}")
+    print(f"Items retrieved: {manifest.returned_item_count}")
+    print(f"Cap assessment: {manifest.cap_status.value}")
+    print(f"Raw JSONL: {result.items_path}")
+    print(f"Fetch manifest: {result.manifest_path}")
+    print()
+    print("No processing or analysis was executed.")
+    return 0
+
+
+def run_collect_full(arguments: argparse.Namespace) -> int:
+    """Delegate the safety-gated national backfill to its reusable service."""
+    return run_full_collection_command(
+        dry_run=arguments.dry_run,
+        execute=arguments.execute,
+        resume=arguments.resume,
+        force=arguments.force,
+        search_scopes_path=arguments.search_scopes,
+        actor_config_path=arguments.actor_config,
+        output_root=arguments.output_root,
+        resume_command="uv run skill-compass collect-full --execute --resume",
+    )
+
+
+def run_fetch_backfill(arguments: argparse.Namespace) -> int:
+    """Delegate no-Actor national retrieval to the reusable Feature 4B service."""
+    if arguments.dry_run and arguments.force:
+        print("--force cannot be combined with --dry-run. Actor invocation: NO")
+        return 2
+    return run_fetch_backfill_command(
+        source_manifest_path=arguments.manifest,
+        dry_run=arguments.dry_run,
+        force=arguments.force,
+        include_all_successful_runs=arguments.include_all_successful_runs,
+        actor_config_path=arguments.actor_config,
+        search_scopes_path=arguments.search_scopes,
+        output_root=arguments.output_root,
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Dispatch one parsed command and return its process exit code."""
     parser = build_parser()
@@ -163,6 +309,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_extract_requirements(arguments)
     if arguments.command == "test-apify-connection":
         return run_test_apify_connection(arguments)
+    if arguments.command == "fetch-apify":
+        return run_fetch_apify(arguments)
+    if arguments.command == "fetch-backfill":
+        return run_fetch_backfill(arguments)
+    if arguments.command == "collect-full":
+        return run_collect_full(arguments)
     parser.error("unsupported command")
     return 2
 

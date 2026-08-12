@@ -1,0 +1,92 @@
+profile_code: data_analytics
+collection_strategy_version: 0.1.0
+keyword: Data Analyst
+country: AU
+country_name: Australia
+cap_warning_threshold: 500
+fetch_descriptions: true
+full_scope_max_items: 0
+
+locations:
+  NT: Northern Territory NT
+  NSW: New South Wales NSW
+  VIC: Victoria VIC
+  QLD: Queensland QLD
+  WA: Western Australia WA
+  SA: South Australia SA
+  ACT: Australian Capital Territory ACT
+  TAS: Tasmania TAS
+
+simple_state_scopes:
+  - NT
+  - QLD
+  - WA
+  - SA
+  - ACT
+  - TAS
+
+partitioned_states:
+  - NSW
+  - VIC
+
+classifications:
+  - classification_id: "1200"
+    classification_name: Accounting
+  - classification_id: "6251"
+    classification_name: Administration & Office Support
+  - classification_id: "6304"
+    classification_name: Advertising, Arts & Media
+  - classification_id: "1203"
+    classification_name: Banking & Financial Services
+  - classification_id: "1204"
+    classification_name: Call Centre & Customer Service
+  - classification_id: "7019"
+    classification_name: CEO & General Management
+  - classification_id: "6163"
+    classification_name: Community Services & Development
+  - classification_id: "1206"
+    classification_name: Construction
+  - classification_id: "6076"
+    classification_name: Consulting & Strategy
+  - classification_id: "6263"
+    classification_name: Design & Architecture
+  - classification_id: "6123"
+    classification_name: Education & Training
+  - classification_id: "1209"
+    classification_name: Engineering
+  - classification_id: "6205"
+    classification_name: Farming, Animals & Conservation
+  - classification_id: "1210"
+    classification_name: Government & Defence
+  - classification_id: "1211"
+    classification_name: Healthcare & Medical
+  - classification_id: "1212"
+    classification_name: Hospitality & Tourism
+  - classification_id: "6317"
+    classification_name: Human Resources & Recruitment
+  - classification_id: "6281"
+    classification_name: Information & Communication Technology
+  - classification_id: "1214"
+    classification_name: Insurance & Superannuation
+  - classification_id: "1216"
+    classification_name: Legal
+  - classification_id: "6092"
+    classification_name: Manufacturing, Transport & Logistics
+  - classification_id: "6008"
+    classification_name: Marketing & Communications
+  - classification_id: "6058"
+    classification_name: Mining, Resources & Energy
+  - classification_id: "1220"
+    classification_name: Real Estate & Property
+  - classification_id: "6043"
+    classification_name: Retail & Consumer Products
+  - classification_id: "6362"
+    classification_name: Sales
+  - classification_id: "1223"
+    classification_name: Science & Technology
+  - classification_id: "6261"
+    classification_name: Self Employment
+  - classification_id: "6246"
+    classification_name: Sport & Recreation
+  - classification_id: "1225"
+    classification_name: Trades & Services

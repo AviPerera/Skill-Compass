@@ -113,3 +113,77 @@ The warning threshold is 500. A count at or above that threshold reports
 `CAP_RISK`, not proven truncation. `CONFIRMED_TRUNCATED` requires explicit,
 verified Actor/source metadata showing that more matches existed than were
 retrieved.
+
+## Feature 4B: fetch an existing Apify dataset
+
+Retrieve an existing dataset without starting or rerunning its Actor:
+
+```shell
+uv run skill-compass fetch-apify --dataset-id DATASET_ID
+```
+
+Alternatively, resolve a completed run's default dataset and fetch it:
+
+```shell
+uv run skill-compass fetch-apify --run-id RUN_ID
+```
+
+The command uses Apify's paginated dataset iterator and writes raw `items.jsonl`
+plus `fetch_manifest.json` below `data/private/collections/fetched/`. These
+private outputs are ignored by Git. Fetching does not invoke an Actor or run
+mapping, cleaning, extraction, classification, or analysis.
+
+Fetch and concatenate every existing dataset referenced by a private national
+backfill manifest without invoking an Actor:
+
+```shell
+uv run python scripts/fetch_full_backfill.py --manifest data/private/collection_manifests/full_backfill_sources.csv --dry-run
+uv run python scripts/fetch_full_backfill.py --manifest data/private/collection_manifests/full_backfill_sources.csv
+```
+
+The equivalent installed command is `uv run skill-compass fetch-backfill` with
+the same options. Successful scope files are skipped on rerun; `--force`
+deliberately re-fetches them. The national JSONL preserves every raw occurrence
+in configured scope order. Duplicate detection and survivor selection remain a
+Feature 2 responsibility.
+
+To append datasets from every other successful existing run of the configured
+`scrapersdelight/seek-jobs-scraper` Actor, use the explicit discovery flag:
+
+```shell
+uv run skill-compass fetch-backfill --manifest data/private/collection_manifests/full_backfill_sources.csv --include-all-successful-runs
+```
+
+Discovery uses the SDK's paginated successful-run iterator and never starts or
+calls the Actor. Datasets already represented by the configured scope manifest
+are excluded from the supplemental download. Additional raw files are written
+below `supplemental/`, their provenance is recorded in
+`supplemental_results.csv`, and all their raw occurrences are appended after the
+66 configured scope datasets in `national_jobs_raw.jsonl`.
+
+## Feature 4C: one-time full national collection
+
+Review the derived 66-scope national plan without making any Apify request:
+
+```shell
+uv run python scripts/run_full_collection.py --dry-run
+```
+
+After reviewing the plan, explicitly start the sequential paid backfill with:
+
+```shell
+uv run python scripts/run_full_collection.py --execute
+```
+
+If an incomplete backfill exists, resume it without rerunning successful scopes:
+
+```shell
+uv run python scripts/run_full_collection.py --execute --resume
+```
+
+A completed backfill blocks another full execution. `--force` deliberately
+creates a new backfill directory and should be used only when another paid
+historical collection is intended. Raw scope files, audit manifests, provenance,
+and the consolidated national JSONL remain below the ignored
+`data/private/collections/full/` directory. Collection never runs through the
+processing or demo commands.

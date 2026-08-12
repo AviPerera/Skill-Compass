@@ -104,21 +104,25 @@ def _nested_value(item: Mapping[str, Any], path: str) -> Any:
     return value
 
 
+def find_source_job_id(item: Mapping[str, Any], paths: tuple[str, ...]) -> str | None:
+    """Return the first non-empty stable source ID from configured raw paths."""
+    return next(
+        (
+            str(value).strip()
+            for path in paths
+            if (value := _nested_value(item, path)) is not None and str(value).strip()
+        ),
+        None,
+    )
+
+
 def count_source_job_ids(
     items: tuple[dict[str, Any], ...], paths: tuple[str, ...]
 ) -> tuple[int | None, int | None]:
     """Count unique and duplicate IDs only when every item has a stable ID."""
     identities: list[str] = []
     for item in items:
-        identity = next(
-            (
-                str(value).strip()
-                for path in paths
-                if (value := _nested_value(item, path)) is not None
-                and str(value).strip()
-            ),
-            None,
-        )
+        identity = find_source_job_id(item, paths)
         if identity is None:
             return None, None
         identities.append(identity)

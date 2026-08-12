@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
+from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -77,4 +79,43 @@ class CollectionResult(BaseModel):
             )
             if identified_count != self.returned_item_count:
                 raise ValueError("job identity counts must reconcile to returned items")
+        return self
+
+
+class FetchManifest(BaseModel):
+    """Record one existing-dataset fetch and its local raw output evidence."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    fetched_at: datetime
+    run_id: str | None = None
+    dataset_id: str
+    returned_item_count: int = Field(ge=0)
+    unique_source_job_id_count: int | None = Field(default=None, ge=0)
+    duplicate_source_job_id_count: int | None = Field(default=None, ge=0)
+    cap_warning_threshold: int = Field(gt=0)
+    cap_status: CapStatus
+    cap_reason: str
+    source_actor_id: str | None = None
+    raw_output_path: Path
+    status: str
+    actor_invocation: Literal[False] = False
+
+    @model_validator(mode="after")
+    def validate_manifest(self) -> FetchManifest:
+        """Require UTC-aware time and internally consistent identity counts."""
+        if self.fetched_at.tzinfo is None:
+            raise ValueError("fetched_at must be timezone-aware")
+        if (self.unique_source_job_id_count is None) != (
+            self.duplicate_source_job_id_count is None
+        ):
+            raise ValueError("source job ID counts must be present or absent together")
+        unique_count = self.unique_source_job_id_count
+        duplicate_count = self.duplicate_source_job_id_count
+        if unique_count is not None and duplicate_count is not None:
+            identified_count = unique_count + duplicate_count
+            if identified_count != self.returned_item_count:
+                raise ValueError(
+                    "source job ID counts must reconcile to returned items"
+                )
         return self

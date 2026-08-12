@@ -1,0 +1,23 @@
+profile_code: data_analytics
+profile_name: Australian Data Analytics
+profile_version: 0.1.0
+requirement_dictionary_version: 0.1.0
+extractor_version: 0.1.0
+extraction_output_schema_version: 0.1.0
+supported_requirement_types:
+  - skill
+section_weights:
+  title_clean: 1.0
+  summary_text_clean: 0.9
+  bullet_points_clean: 0.9
+  description_text_clean: 0.7
+confidence_thresholds:
+  high_min: 0.8
+  medium_min: 0.6
+  low_min: 0.3
+evidence_snippet_length: 160
+negative_context_window: 48
+minimum_analytical_eligibility:
+  require_analytically_eligible: true
+  require_usable_description: true
+active: true

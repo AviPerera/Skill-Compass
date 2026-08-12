@@ -1,0 +1,55 @@
+requirement_code,requirement_name,requirement_type,category_code,category_name,dashboard_group,alias_text,match_type,case_sensitive,require_word_boundary,negative_context_terms,active,sort_order,dictionary_version,notes
+sql,SQL,skill,database,Database,Technical Skills,SQL,token,false,true,not required|without using,true,1,0.1.0,Canonical token
+sql,SQL,skill,database,Database,Technical Skills,structured query language,phrase,false,true,not required|without using,true,1,0.1.0,Reviewed expansion
+sql_server,SQL Server,skill,database,Database,Technical Skills,SQL Server,phrase,false,true,not required|without using,true,2,0.1.0,Longest match wins over nested SQL
+sql_server,SQL Server,skill,database,Database,Technical Skills,Microsoft SQL Server,phrase,false,true,not required|without using,true,2,0.1.0,Product name
+power_bi,Power BI,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,Power BI,phrase,false,true,not required|without using,true,3,0.1.0,Canonical phrase
+power_bi,Power BI,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,PowerBI,token,false,true,not required|without using,true,3,0.1.0,Common closed form
+dax,DAX,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,DAX,token,false,true,not required|without using,true,4,0.1.0,Canonical token
+tableau,Tableau,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,Tableau,token,false,true,not required|without using,true,5,0.1.0,Canonical token
+excel,Excel,skill,spreadsheet,Spreadsheet,Technical Skills,Excel,token,false,true,not required|without using,true,6,0.1.0,Canonical token
+excel,Excel,skill,spreadsheet,Spreadsheet,Technical Skills,Microsoft Excel,phrase,false,true,not required|without using,true,6,0.1.0,Product name
+python,Python,skill,programming,Programming,Technical Skills,Python,token,false,true,not required|without using,true,7,0.1.0,Canonical token
+r,R,skill,programming,Programming,Technical Skills,R,token,true,true,not required|without using,true,8,0.1.0,Case-sensitive short token
+pandas,Pandas,skill,data_science,Data Science and Analytics,Technical Skills,Pandas,token,false,true,not required|without using,true,9,0.1.0,Canonical token
+numpy,NumPy,skill,data_science,Data Science and Analytics,Technical Skills,NumPy,token,false,true,not required|without using,true,10,0.1.0,Canonical token
+data_visualisation,Data Visualisation,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,data visualisation,phrase,false,true,not required|without using,true,11,0.1.0,Australian spelling
+data_visualisation,Data Visualisation,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,data visualization,phrase,false,true,not required|without using,true,11,0.1.0,US spelling
+data_visualisation,Data Visualisation,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,data viz,phrase,false,true,not required|without using,true,11,0.1.0,Reviewed abbreviation
+statistics,Statistics,skill,data_science,Data Science and Analytics,Technical Skills,Statistics,token,false,true,not required|without using,true,12,0.1.0,Canonical token
+statistics,Statistics,skill,data_science,Data Science and Analytics,Technical Skills,statistical analysis,phrase,false,true,not required|without using,true,12,0.1.0,Reviewed phrase
+machine_learning,Machine Learning,skill,data_science,Data Science and Analytics,Technical Skills,machine learning,phrase,false,true,not required|without using,true,13,0.1.0,Canonical phrase
+machine_learning,Machine Learning,skill,data_science,Data Science and Analytics,Technical Skills,ML,token,true,true,not required|without using,true,13,0.1.0,Case-sensitive abbreviation
+nlp,NLP,skill,data_science,Data Science and Analytics,Technical Skills,NLP,token,true,true,not required|without using,true,14,0.1.0,Case-sensitive abbreviation
+nlp,NLP,skill,data_science,Data Science and Analytics,Technical Skills,natural language processing,phrase,false,true,not required|without using,true,14,0.1.0,Expanded phrase
+spark,Spark,skill,data_engineering,Data Engineering,Technical Skills,Spark,token,false,true,not required|without using,true,15,0.1.0,Canonical token
+spark,Spark,skill,data_engineering,Data Engineering,Technical Skills,Apache Spark,phrase,false,true,not required|without using,true,15,0.1.0,Product name
+azure,Azure,skill,cloud,Cloud Platforms,Technical Skills,Azure,token,false,true,not required|without using,true,16,0.1.0,Canonical token
+azure,Azure,skill,cloud,Cloud Platforms,Technical Skills,Microsoft Azure,phrase,false,true,not required|without using,true,16,0.1.0,Product name
+aws,AWS,skill,cloud,Cloud Platforms,Technical Skills,AWS,token,true,true,not required|without using,true,17,0.1.0,Case-sensitive abbreviation
+aws,AWS,skill,cloud,Cloud Platforms,Technical Skills,Amazon Web Services,phrase,false,true,not required|without using,true,17,0.1.0,Expanded phrase
+etl,ETL,skill,data_engineering,Data Engineering,Technical Skills,ETL,token,true,true,not required|without using,true,18,0.1.0,Case-sensitive abbreviation
+etl,ETL,skill,data_engineering,Data Engineering,Technical Skills,extract transform load,phrase,false,true,not required|without using,true,18,0.1.0,Expanded phrase
+data_cleaning,Data Cleaning,skill,data_engineering,Data Engineering,Technical Skills,data cleaning,phrase,false,true,not required|without using,true,19,0.1.0,Canonical phrase
+data_cleaning,Data Cleaning,skill,data_engineering,Data Engineering,Technical Skills,data cleansing,phrase,false,true,not required|without using,true,19,0.1.0,Reviewed synonym
+data_modelling,Data Modelling,skill,data_engineering,Data Engineering,Technical Skills,data modelling,phrase,false,true,not required|without using,true,20,0.1.0,Australian spelling
+data_modelling,Data Modelling,skill,data_engineering,Data Engineering,Technical Skills,data modeling,phrase,false,true,not required|without using,true,20,0.1.0,US spelling
+reporting,Reporting,skill,business_intelligence,Business Intelligence and Visualisation,Technical Skills,Reporting,token,false,true,not required|without using,true,21,0.1.0,Canonical token
+communication,Communication,skill,soft_skills,Soft Skills,Soft Skills,Communication,token,false,true,not required|without using,true,22,0.1.0,Canonical token
+communication,Communication,skill,soft_skills,Soft Skills,Soft Skills,communication skills,phrase,false,true,not required|without using,true,22,0.1.0,Common phrase
+stakeholder_management,Stakeholder Management,skill,business_analysis,Business Analysis,Management Skills,stakeholder management,phrase,false,true,not required|without using,true,23,0.1.0,Canonical phrase
+stakeholder_management,Stakeholder Management,skill,business_analysis,Business Analysis,Management Skills,manage stakeholders,phrase,false,true,not required|without using,true,23,0.1.0,Reviewed phrase
+problem_solving,Problem Solving,skill,soft_skills,Soft Skills,Soft Skills,problem solving,phrase,false,true,not required|without using,true,24,0.1.0,Canonical phrase
+problem_solving,Problem Solving,skill,soft_skills,Soft Skills,Soft Skills,problem-solving,phrase,false,true,not required|without using,true,24,0.1.0,Hyphenated form
+teamwork,Teamwork,skill,soft_skills,Soft Skills,Soft Skills,Teamwork,token,false,true,not required|without using,true,25,0.1.0,Canonical token
+teamwork,Teamwork,skill,soft_skills,Soft Skills,Soft Skills,team player,phrase,false,true,not required|without using,true,25,0.1.0,Reviewed phrase
+presentation,Presentation,skill,soft_skills,Soft Skills,Soft Skills,Presentation,token,false,true,not required|without using,true,26,0.1.0,Canonical token
+presentation,Presentation,skill,soft_skills,Soft Skills,Soft Skills,presentation skills,phrase,false,true,not required|without using,true,26,0.1.0,Common phrase
+critical_thinking,Critical Thinking,skill,soft_skills,Soft Skills,Soft Skills,critical thinking,phrase,false,true,not required|without using,true,27,0.1.0,Canonical phrase
+attention_to_detail,Attention to Detail,skill,soft_skills,Soft Skills,Soft Skills,attention to detail,phrase,false,true,not required|without using,true,28,0.1.0,Canonical phrase
+business_analysis,Business Analysis,skill,business_analysis,Business Analysis,Business Skills,business analysis,phrase,false,true,not required|without using,true,29,0.1.0,Canonical phrase
+business_analysis,Business Analysis,skill,business_analysis,Business Analysis,Business Skills,business analyst,phrase,false,true,not required|without using,true,29,0.1.0,Common role-context phrase
+requirements_gathering,Requirements Gathering,skill,business_analysis,Business Analysis,Business Skills,requirements gathering,phrase,false,true,not required|without using,true,30,0.1.0,Canonical phrase
+requirements_gathering,Requirements Gathering,skill,business_analysis,Business Analysis,Business Skills,requirement gathering,phrase,false,true,not required|without using,true,30,0.1.0,Singular form
+data_storytelling,Data Storytelling,skill,business_intelligence,Business Intelligence and Visualisation,Business Skills,data storytelling,phrase,false,true,not required|without using,true,31,0.1.0,Canonical phrase
+data_storytelling,Data Storytelling,skill,business_intelligence,Business Intelligence and Visualisation,Business Skills,storytelling with data,phrase,false,true,not required|without using,true,31,0.1.0,Reviewed phrase

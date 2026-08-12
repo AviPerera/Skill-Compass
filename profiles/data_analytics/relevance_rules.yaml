@@ -1,0 +1,183 @@
+profile_code: data_analytics
+relevance_classifier_version: 0.1.0
+relevance_rules_version: 0.1.0
+relevance_output_schema_version: 0.1.0
+
+# Scores are deterministic evidence strengths, not statistical probabilities.
+# Each configured term contributes at most once at its strongest section.
+weights:
+  approved_role_high: 0.34
+  approved_role_medium: 0.26
+  approved_role_low: 0.12
+  strong_title: 0.30
+  general_title: 0.20
+  adjacent_title: 0.08
+  positive_responsibility: 0.09
+  positive_source: 0.06
+  strong_requirement: 0.08
+  category_requirement: 0.04
+  negative_title: 0.36
+  negative_responsibility: 0.12
+  negative_source: 0.08
+  evidence_diversity_bonus: 0.04
+
+thresholds:
+  inclusion_score: 0.72
+  exclusion_score: 0.30
+  meaningful_signal: 0.10
+  direct_positive_strength: 0.62
+  direct_negative_strength: 0.55
+  conflict_strength: 0.30
+  conflict_margin: 0.12
+  fallback_positive_strength: 0.48
+  weak_positive_ceiling: 0.12
+  minimum_usable_text_length: 80
+
+limits:
+  positive_terms_per_section: 3
+  negative_terms_per_section: 3
+  requirements_per_group: 3
+  source_terms: 2
+  maximum_diversity_bonus_families: 3
+  evidence_term_max_length: 100
+  context_snippet_max_length: 180
+  review_evidence_max_length: 600
+
+responsibility_section_multipliers:
+  summary_text_clean: 1.00
+  bullet_points_clean: 0.90
+  description_text_clean: 0.75
+
+approved_role_codes:
+  - data_analyst
+  - business_analyst
+  - bi_analyst
+  - reporting_analyst
+  - data_scientist
+
+strongly_included_title_terms:
+  - data analyst
+  - business intelligence analyst
+  - bi analyst
+  - reporting analyst
+  - business analyst
+  - data scientist
+
+generally_included_title_terms:
+  - analytics analyst
+  - insights analyst
+  - analytics consultant
+  - analytics specialist
+  - decision support analyst
+  - reporting specialist
+
+# These are intentionally governed as ambiguous profile-boundary occupations.
+adjacent_title_terms:
+  - analytics engineer
+  - data engineer
+  - machine learning engineer
+  - data architect
+
+generic_title_terms:
+  - analyst
+  - senior analyst
+
+strongly_excluded_title_terms:
+  - application support analyst
+  - help desk analyst
+  - software support analyst
+  - software engineer
+  - network administrator
+  - payroll officer
+  - payroll administrator
+  - financial accountant
+  - management accountant
+  - sales administrator
+  - warehouse coordinator
+  - research fellow
+  - clinical research coordinator
+
+positive_responsibility_terms:
+  - analyse data
+  - analyze data
+  - data analysis
+  - data analytics
+  - query data
+  - querying data
+  - produce insights
+  - actionable insights
+  - dashboard development
+  - develop dashboards
+  - data visualisation
+  - data visualization
+  - statistical analysis
+  - predictive modelling
+  - predictive modeling
+  - machine learning
+  - interpret trends
+  - requirements gathering
+  - business requirements
+  - process mapping
+  - stakeholder workshops
+  - management reporting
+  - performance reporting
+  - data modelling
+  - data modeling
+
+negative_responsibility_terms:
+  - resolve support tickets
+  - application support
+  - troubleshoot software
+  - network administration
+  - process payroll
+  - payroll processing
+  - prepare tax returns
+  - statutory accounting
+  - accounts payable
+  - accounts receivable
+  - sales administration
+  - cold calling
+  - warehouse operations
+  - patient care
+  - clinical care
+  - teach undergraduate
+  - academic research
+
+positive_requirement_categories:
+  - database
+  - business_intelligence
+  - spreadsheet
+  - programming
+  - data_science
+  - business_analysis
+
+strong_requirement_codes:
+  - sql
+  - power_bi
+  - dax
+  - tableau
+  - python
+  - data_visualisation
+  - statistics
+  - machine_learning
+  - reporting
+  - business_analysis
+  - requirements_gathering
+
+positive_source_terms:
+  - analysts
+  - analysis & reporting
+  - business/systems analysts
+  - market research & analysis
+  - mathematics, statistics & information sciences
+  - strategy & planning
+
+negative_source_terms:
+  - help desk & it support
+  - financial accounting & reporting
+  - management accounting & budgeting
+  - payroll
+  - sales representatives/consultants
+  - warehousing, storage & distribution
+  - teaching - tertiary
+  - nursing - general medical & surgical

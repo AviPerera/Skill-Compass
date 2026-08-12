@@ -1,11 +1,12 @@
-"""Define typed contracts for explainable role and seniority classification.
+"""Define typed contracts for explainable deterministic classification.
 
 These application-layer records are storage-neutral and must not read files,
-render charts, or implement profile-relevance decisions.
+render charts, or implement classification decisions.
 """
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 from typing import Literal
 
@@ -353,4 +354,202 @@ class SeniorityClassificationRunResult(ImmutableModel):
     distribution: tuple[SeniorityDistributionSummary, ...]
     quality: SeniorityClassificationQuality
     review_queue: tuple[SeniorityReviewQueueItem, ...]
+    reconciliation_passed: bool
+
+
+# =============================================================================
+# Governed profile-relevance configuration
+# =============================================================================
+
+
+class RelevanceScoringWeights(ImmutableModel):
+    """Define bounded contributions from independent relevance evidence."""
+
+    approved_role_high: Decimal = Field(ge=0, le=1)
+    approved_role_medium: Decimal = Field(ge=0, le=1)
+    approved_role_low: Decimal = Field(ge=0, le=1)
+    strong_title: Decimal = Field(ge=0, le=1)
+    general_title: Decimal = Field(ge=0, le=1)
+    adjacent_title: Decimal = Field(ge=0, le=1)
+    positive_responsibility: Decimal = Field(ge=0, le=1)
+    positive_source: Decimal = Field(ge=0, le=1)
+    strong_requirement: Decimal = Field(ge=0, le=1)
+    category_requirement: Decimal = Field(ge=0, le=1)
+    negative_title: Decimal = Field(ge=0, le=1)
+    negative_responsibility: Decimal = Field(ge=0, le=1)
+    negative_source: Decimal = Field(ge=0, le=1)
+    evidence_diversity_bonus: Decimal = Field(ge=0, le=1)
+
+
+class RelevanceDecisionThresholds(ImmutableModel):
+    """Define score, conflict, text, and fallback decision boundaries."""
+
+    inclusion_score: Decimal = Field(ge=0, le=1)
+    exclusion_score: Decimal = Field(ge=0, le=1)
+    meaningful_signal: Decimal = Field(ge=0, le=1)
+    direct_positive_strength: Decimal = Field(ge=0, le=1)
+    direct_negative_strength: Decimal = Field(ge=0, le=1)
+    conflict_strength: Decimal = Field(ge=0, le=1)
+    conflict_margin: Decimal = Field(ge=0, le=1)
+    fallback_positive_strength: Decimal = Field(ge=0, le=1)
+    weak_positive_ceiling: Decimal = Field(ge=0, le=1)
+    minimum_usable_text_length: int = Field(ge=0, le=1000)
+
+
+class RelevanceEvidenceLimits(ImmutableModel):
+    """Bound matched terms, family contributions, and review snippets."""
+
+    positive_terms_per_section: int = Field(ge=1, le=20)
+    negative_terms_per_section: int = Field(ge=1, le=20)
+    requirements_per_group: int = Field(ge=1, le=20)
+    source_terms: int = Field(ge=1, le=10)
+    maximum_diversity_bonus_families: int = Field(ge=1, le=10)
+    evidence_term_max_length: int = Field(ge=20, le=160)
+    context_snippet_max_length: int = Field(ge=40, le=300)
+    review_evidence_max_length: int = Field(ge=80, le=1000)
+
+
+class RelevanceRuleSet(ImmutableModel):
+    """Represent one validated and reproducibly hashed relevance rule set."""
+
+    profile_code: str
+    relevance_classifier_version: str
+    relevance_rules_version: str
+    relevance_output_schema_version: str
+    weights: RelevanceScoringWeights
+    thresholds: RelevanceDecisionThresholds
+    limits: RelevanceEvidenceLimits
+    responsibility_section_multipliers: dict[str, Decimal]
+    approved_role_codes: tuple[str, ...]
+    strongly_included_title_terms: tuple[str, ...]
+    generally_included_title_terms: tuple[str, ...]
+    adjacent_title_terms: tuple[str, ...]
+    generic_title_terms: tuple[str, ...]
+    strongly_excluded_title_terms: tuple[str, ...]
+    positive_responsibility_terms: tuple[str, ...]
+    negative_responsibility_terms: tuple[str, ...]
+    positive_requirement_categories: tuple[str, ...]
+    strong_requirement_codes: tuple[str, ...]
+    positive_source_terms: tuple[str, ...]
+    negative_source_terms: tuple[str, ...]
+    relevance_rules_hash: str
+
+
+# =============================================================================
+# Profile-relevance evidence and outputs
+# =============================================================================
+
+
+RelevanceStatus = Literal["included", "excluded", "review"]
+RelevanceEffect = Literal["positive", "negative", "conflicting"]
+RelevanceReasonCode = Literal[
+    "direct_multi_source_inclusion",
+    "direct_clear_exclusion",
+    "weighted_inclusion",
+    "weighted_exclusion",
+    "multi_evidence_inclusion",
+    "clear_irrelevance",
+    "conflicting_role_evidence",
+    "insufficient_evidence",
+    "generic_analyst_title",
+    "adjacent_role",
+    "positive_negative_tie",
+    "weak_relevance_signal",
+    "role_classifier_uncertain",
+]
+
+
+class ProfileRelevanceEvidence(ImmutableModel):
+    """Preserve one bounded contribution to a relevance decision."""
+
+    source_code: str
+    source_job_id: str
+    evidence_family: str
+    evidence_section: str
+    evidence_term: str
+    evidence_effect: RelevanceEffect
+    evidence_weight: Decimal = Field(ge=-1, le=1)
+    context_snippet: str
+
+
+class JobProfileRelevance(ImmutableModel):
+    """Represent one explainable profile inclusion-gate decision."""
+
+    source_code: str
+    source_job_id: str
+    profile_code: str
+    relevance_status: RelevanceStatus
+    relevance_score: Decimal = Field(ge=0, le=1)
+    relevance_review_flag: bool
+    relevance_reason_code: RelevanceReasonCode
+    relevance_reason: str
+    relevance_classifier_version: str
+    relevance_rules_version: str
+    relevance_rules_hash: str
+    positive_evidence_count: int = Field(ge=0)
+    negative_evidence_count: int = Field(ge=0)
+    evidence_family_count: int = Field(ge=0)
+    relevance_quality_flags: tuple[str, ...] = ()
+    classified_at: datetime
+
+
+class ProfileRelevanceSummary(ImmutableModel):
+    """Store reconciled run counts and non-accuracy quality diagnostics."""
+
+    total_classifier_input: int = Field(ge=0)
+    included_count: int = Field(ge=0)
+    included_rate: Decimal = Field(ge=0, le=1)
+    excluded_count: int = Field(ge=0)
+    excluded_rate: Decimal = Field(ge=0, le=1)
+    review_count: int = Field(ge=0)
+    review_rate: Decimal = Field(ge=0, le=1)
+    missing_description_count: int = Field(ge=0)
+    insufficient_evidence_count: int = Field(ge=0)
+    conflicting_evidence_count: int = Field(ge=0)
+    role_supported_decision_count: int = Field(ge=0)
+    multi_evidence_decision_count: int = Field(ge=0)
+    reconciliation_status: Literal["pass", "fail"]
+    denominator_definition: str
+
+
+class ProfileRelevanceReviewQueueItem(ImmutableModel):
+    """Expose bounded fields required to inspect a relevance Review result."""
+
+    source_code: str
+    source_job_id: str
+    title_clean: str
+    relevance_score: Decimal = Field(ge=0, le=1)
+    relevance_reason_code: RelevanceReasonCode
+    relevance_reason: str
+    bounded_evidence: str
+
+
+class ProfileRelevanceDiagnostic(ImmutableModel):
+    """Join relevance with upstream quality signals without affecting decisions."""
+
+    source_code: str
+    source_job_id: str
+    relevance_status: RelevanceStatus
+    relevance_score: Decimal = Field(ge=0, le=1)
+    role_group: str
+    role_confidence: Decimal = Field(ge=0, le=1)
+    seniority_level: str | None = None
+    seniority_confidence: Decimal | None = Field(default=None, ge=0, le=1)
+    requirement_count: int = Field(ge=0)
+    usable_text_length: int = Field(ge=0)
+    missing_title: bool
+    description_available: bool
+    review_reason: str | None = None
+
+
+class ProfileRelevanceRunResult(ImmutableModel):
+    """Bundle relevance decisions, evidence, reviews, and diagnostics."""
+
+    rules: RelevanceRuleSet
+    input_job_count: int = Field(ge=0)
+    classifications: tuple[JobProfileRelevance, ...]
+    evidence: tuple[ProfileRelevanceEvidence, ...]
+    summary: ProfileRelevanceSummary
+    review_queue: tuple[ProfileRelevanceReviewQueueItem, ...]
+    diagnostics: tuple[ProfileRelevanceDiagnostic, ...]
     reconciliation_passed: bool

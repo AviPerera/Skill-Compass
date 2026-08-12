@@ -1,4 +1,4 @@
-"""Define controlled failures for role and seniority classification.
+"""Define controlled failures for deterministic classification features.
 
 These exceptions separate configuration, input, and reconciliation failures;
 they must not implement retry, network, persistence, or classification logic.
@@ -35,3 +35,19 @@ class SeniorityInputError(SeniorityClassificationError):
 
 class SeniorityReconciliationError(SeniorityClassificationError):
     """Report seniority outputs that do not reconcile to classifier input."""
+
+
+class RelevanceClassificationError(Exception):
+    """Base exception for controlled profile-relevance failures."""
+
+
+class RelevanceConfigurationError(RelevanceClassificationError):
+    """Report an invalid or unreadable governed relevance-rule document."""
+
+
+class RelevanceInputError(RelevanceClassificationError):
+    """Report incomplete, duplicate, or unreadable relevance input."""
+
+
+class RelevanceReconciliationError(RelevanceClassificationError):
+    """Report relevance outputs that do not reconcile to classifier input."""

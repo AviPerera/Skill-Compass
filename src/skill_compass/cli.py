@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 from collections.abc import Sequence
 from pathlib import Path
 
 from skill_compass.classification.errors import (
+    RelevanceClassificationError,
     RoleClassificationError,
     RoleConfigurationError,
     SeniorityClassificationError,
@@ -27,6 +29,9 @@ from skill_compass.extraction.errors import (
 )
 from skill_compass.mapping.errors import MappingConfigurationError
 from skill_compass.services.apify_connection_test import run_apify_connection_test
+from skill_compass.services.classify_profile_relevance import (
+    process_profile_relevance,
+)
 from skill_compass.services.classify_roles import process_role_classification
 from skill_compass.services.classify_seniority import process_seniority_classification
 from skill_compass.services.clean_csv import ReconciliationError, process_csv
@@ -97,6 +102,15 @@ def build_parser() -> argparse.ArgumentParser:
     classify_seniority.add_argument("--input", type=Path, required=True)
     classify_seniority.add_argument("--rules", type=Path, required=True)
     classify_seniority.add_argument("--output-dir", type=Path, required=True)
+
+    classify_relevance = subcommands.add_parser(
+        "classify-relevance",
+        help="classify profile relevance from existing Feature 2/3/5/6 outputs",
+    )
+    classify_relevance.add_argument("--input", type=Path, required=True)
+    classify_relevance.add_argument("--profile", default="data_analytics")
+    classify_relevance.add_argument("--rules", type=Path)
+    classify_relevance.add_argument("--output-dir", type=Path, required=True)
 
     apify_test = subcommands.add_parser(
         "test-apify-connection",
@@ -332,6 +346,41 @@ def run_classify_seniority(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def run_classify_relevance(arguments: argparse.Namespace) -> int:
+    """Call the relevance service and print a concise privacy-safe summary."""
+    if re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*", arguments.profile) is None:
+        print("classify-relevance failed: profile must use lower-case snake_case")
+        print("External API requests: 0")
+        return 1
+    rules_path = arguments.rules or (
+        Path("profiles") / arguments.profile / "relevance_rules.yaml"
+    )
+    try:
+        run = process_profile_relevance(
+            input_dir=arguments.input,
+            rules_path=rules_path,
+            output_dir=arguments.output_dir,
+        )
+    except (RelevanceClassificationError, csv.Error, OSError, ValueError) as error:
+        print(f"classify-relevance failed: {error}")
+        print("External API requests: 0")
+        return 1
+
+    result = run.classification
+    summary = result.summary
+    print("classify-relevance completed successfully")
+    print(f"Classifier input jobs: {summary.total_classifier_input}")
+    print(f"Included jobs: {summary.included_count}")
+    print(f"Excluded jobs: {summary.excluded_count}")
+    print(f"Review jobs: {summary.review_count}")
+    print(f"Review rate: {summary.review_rate}")
+    print(f"Evidence rows: {len(result.evidence)}")
+    print("Reconciliation: PASS")
+    print("External API requests: 0")
+    print(f"Output directory: {run.output_dir}")
+    return 0
+
+
 def run_test_apify_connection(arguments: argparse.Namespace) -> int:
     """Run only the bounded Apify test and print no source records or secrets."""
     try:
@@ -445,6 +494,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_classify_roles(arguments)
     if arguments.command == "classify-seniority":
         return run_classify_seniority(arguments)
+    if arguments.command == "classify-relevance":
+        return run_classify_relevance(arguments)
     if arguments.command == "test-apify-connection":
         return run_test_apify_connection(arguments)
     if arguments.command == "fetch-apify":

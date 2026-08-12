@@ -162,6 +162,20 @@ written below `supplemental/`, its provenance is recorded in
 `national_jobs_raw.jsonl`. The fetch is `COMPLETE` when discovery succeeds and
 all discovered datasets are fetched successfully.
 
+Run the live Feature 4 demonstration with:
+
+```shell
+uv run python scripts/demo_feature_4.py
+```
+
+The demonstration authenticates with `APIFY_TOKEN`, discovers existing
+successful runs, retrieves their datasets, reconciles the combined raw JSONL,
+and prints dataset, search-scope, cap-risk, and raw-listing summaries. State
+counts are derived only from each run's original Actor `INPUT.location` when it
+exactly matches a configured SEEK search location. Individual job locations are
+not cleaned or normalised, duplicate occurrences remain present, and Feature 2
+is not started. Reruns skip successful local datasets unless `--force` is used.
+
 ## Feature 4C: one-time full national collection
 
 Review the derived 66-scope national plan without making any Apify request:

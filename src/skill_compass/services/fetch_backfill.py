@@ -133,6 +133,13 @@ class SupplementalFetchResult(FrozenModel):
     run_id: str
     dataset_id: str
     started_at: datetime
+    search_location: str | None = None
+    state_code: str | None = None
+    scope_type: Literal["state", "classification", "other", "unrecognised"] = (
+        "unrecognised"
+    )
+    classification_id: str | None = None
+    classification_name: str | None = None
     returned_item_count: int = Field(default=0, ge=0)
     cap_status: CapStatus = CapStatus.UNKNOWN
     fetch_status: Literal[ScopeFetchStatus.SUCCESS, ScopeFetchStatus.FAILED]
@@ -543,6 +550,7 @@ def _fetch_supplemental_dataset(
     raw_path: Path,
     settings: ApifySettings,
     shared_client: Any,
+    search_config: SearchScopeConfig,
     cap_warning_threshold: int,
     fetched_at: datetime,
 ) -> SupplementalFetchResult:
@@ -571,11 +579,13 @@ def _fetch_supplemental_dataset(
         returned_item_count=returned_count,
         warning_threshold=cap_warning_threshold,
     )
+    provenance = _supplemental_scope_provenance(discovered, search_config)
     return SupplementalFetchResult(
         supplemental_id=_supplemental_id(discovered.run_id),
         run_id=discovered.run_id,
         dataset_id=discovered.dataset_id,
         started_at=discovered.started_at,
+        **provenance,
         returned_item_count=returned_count,
         cap_status=cap.status,
         fetch_status=ScopeFetchStatus.SUCCESS,
@@ -589,19 +599,79 @@ def _failed_supplemental_result(
     discovered: ExistingActorDataset,
     error: Exception,
     token: str,
+    search_config: SearchScopeConfig,
     fetched_at: datetime,
 ) -> SupplementalFetchResult:
     """Record one safe discovered-dataset failure without stopping later fetches."""
+    provenance = _supplemental_scope_provenance(discovered, search_config)
     return SupplementalFetchResult(
         supplemental_id=_supplemental_id(discovered.run_id),
         run_id=discovered.run_id,
         dataset_id=discovered.dataset_id,
         started_at=discovered.started_at,
+        **provenance,
         fetch_status=ScopeFetchStatus.FAILED,
         error_code=type(error).__name__,
         error_detail=_safe_error_detail(error, token),
         fetched_at=fetched_at,
     )
+
+
+def _supplemental_scope_provenance(
+    discovered: ExistingActorDataset,
+    search_config: SearchScopeConfig,
+) -> dict[str, str | None]:
+    """Classify only exact Actor search inputs, never raw listing locations."""
+    actor_input = discovered.actor_input
+    if actor_input is None:
+        return {
+            "search_location": None,
+            "state_code": None,
+            "scope_type": "unrecognised",
+            "classification_id": None,
+            "classification_name": None,
+        }
+    location_value = actor_input.get("location")
+    search_location = (
+        location_value.strip() if isinstance(location_value, str) else None
+    )
+    state_code = next(
+        (
+            code
+            for code, configured_location in search_config.locations.items()
+            if search_location == configured_location
+        ),
+        None,
+    )
+    classification_value = actor_input.get("classification")
+    classification_id = (
+        str(classification_value).strip()
+        if classification_value is not None and str(classification_value).strip()
+        else None
+    )
+    classification_name = next(
+        (
+            item.classification_name
+            for item in search_config.classifications
+            if item.classification_id == classification_id
+        ),
+        None,
+    )
+    if state_code is not None and classification_name is not None:
+        scope_type = "classification"
+    elif state_code is not None and classification_id is None:
+        scope_type = "state"
+    elif search_location is not None or classification_id is not None:
+        scope_type = "other"
+    else:
+        scope_type = "unrecognised"
+    return {
+        "search_location": search_location,
+        "state_code": state_code,
+        "scope_type": scope_type,
+        "classification_id": classification_id,
+        "classification_name": classification_name,
+    }
 
 
 # =============================================================================
@@ -948,7 +1018,16 @@ def fetch_full_backfill(
                     and previous.local_raw_path == expected_path.resolve()
                     and expected_path.exists()
                 ):
-                    supplemental_by_run[item.run_id] = previous
+                    supplemental_by_run[item.run_id] = (
+                        previous.model_copy(
+                            update=_supplemental_scope_provenance(
+                                item,
+                                plan.search_config,
+                            )
+                        )
+                        if item.actor_input is not None
+                        else previous
+                    )
                     event_handler(f"[SKIP EXTRA] {item.run_id} — already fetched")
                     continue
                 if (
@@ -966,6 +1045,7 @@ def fetch_full_backfill(
                         raw_path=expected_path,
                         settings=settings,
                         shared_client=shared_client,
+                        search_config=plan.search_config,
                         cap_warning_threshold=(
                             plan.search_config.cap_warning_threshold
                         ),
@@ -976,6 +1056,7 @@ def fetch_full_backfill(
                         discovered=item,
                         error=error,
                         token=token,
+                        search_config=plan.search_config,
                         fetched_at=clock(),
                     )
                     event_handler(

@@ -7,6 +7,7 @@ Actor. It must never start, call, restart, abort, or otherwise mutate a run.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -30,6 +31,7 @@ class ExistingActorDataset:
     run_id: str
     dataset_id: str
     started_at: datetime
+    actor_input: Mapping[str, Any] | None = None
 
 
 def _resource_id(value: Any, label: str) -> str:
@@ -38,6 +40,18 @@ def _resource_id(value: Any, label: str) -> str:
     if not normalized or not _RESOURCE_ID_PATTERN.fullmatch(normalized):
         raise ApifyCollectionError(f"discovered {label} is missing or invalid")
     return normalized
+
+
+def _read_actor_input(client: Any, key_value_store_id: str) -> Mapping[str, Any] | None:
+    """Read one existing INPUT record, returning unknown provenance on failure."""
+    try:
+        input_record = client.key_value_store(key_value_store_id).get_record("INPUT")
+    except ApifyClientError:
+        return None
+    actor_input = (
+        input_record.get("value") if isinstance(input_record, Mapping) else None
+    )
+    return actor_input if isinstance(actor_input, Mapping) else None
 
 
 def discover_successful_actor_datasets(
@@ -62,6 +76,11 @@ def discover_successful_actor_datasets(
                 raise ApifyCollectionError(
                     "discovered successful run has no timezone-aware start time"
                 )
+            key_value_store_id = _resource_id(
+                getattr(run, "default_key_value_store_id", None),
+                "default key-value store ID",
+            )
+            actor_input = _read_actor_input(client, key_value_store_id)
             discovered.append(
                 ExistingActorDataset(
                     run_id=_resource_id(getattr(run, "id", None), "run ID"),
@@ -70,6 +89,7 @@ def discover_successful_actor_datasets(
                         "default dataset ID",
                     ),
                     started_at=started_at,
+                    actor_input=actor_input,
                 )
             )
     except ApifyCollectionError:

@@ -14,6 +14,10 @@ from skill_compass.collection.search_scopes import (
     build_search_scopes,
     load_search_scope_config,
 )
+from skill_compass.services.demo_feature_4 import (
+    Feature4DemoResult,
+    render_feature_4_demo,
+)
 from skill_compass.services.fetch_backfill import (
     BackfillFetchPlan,
     BackfillFetchStatus,
@@ -33,6 +37,7 @@ def _discovered_run(run_id: str, dataset_id: str, *, minute: int) -> SimpleNames
     return SimpleNamespace(
         id=run_id,
         default_dataset_id=dataset_id,
+        default_key_value_store_id=f"store-{run_id}",
         started_at=datetime(2026, 8, 1, 1, minute, tzinfo=UTC),
     )
 
@@ -104,6 +109,17 @@ class ReadOnlyActorClient:
         raise AssertionError("Feature 4B must never start an Actor")
 
 
+class FakeKeyValueStoreClient:
+    """Return one read-only Actor input record for provenance reporting."""
+
+    def __init__(self, value: dict[str, Any] | None) -> None:
+        self.value = value
+
+    def get_record(self, key: str) -> dict[str, Any] | None:
+        assert key == "INPUT"
+        return None if self.value is None else {"key": key, "value": self.value}
+
+
 class NoActorApifyClient:
     """Fail the test if batch retrieval touches any Actor interface."""
 
@@ -114,6 +130,7 @@ class NoActorApifyClient:
         datasets: dict[str, FakeDatasetClient],
         runs: dict[str, SimpleNamespace | None] | None = None,
         discovered_run_pages: tuple[tuple[SimpleNamespace, ...], ...] = (),
+        run_inputs: dict[str, dict[str, Any] | None] | None = None,
     ) -> None:
         self.token = token
         self.datasets = datasets
@@ -122,6 +139,7 @@ class NoActorApifyClient:
         self.run_requests: list[str] = []
         self.actor_requests: list[str] = []
         self.run_collection = FakeRunCollection(discovered_run_pages)
+        self.run_inputs = run_inputs or {}
 
     def actor(self, actor_id: str) -> ReadOnlyActorClient:
         self.actor_requests.append(actor_id)
@@ -137,6 +155,9 @@ class NoActorApifyClient:
     def run(self, run_id: str) -> FakeRunClient:
         self.run_requests.append(run_id)
         return FakeRunClient(self.runs.get(run_id))
+
+    def key_value_store(self, store_id: str) -> FakeKeyValueStoreClient:
+        return FakeKeyValueStoreClient(self.run_inputs.get(store_id))
 
 
 def _small_config() -> SearchScopeConfig:
@@ -350,6 +371,19 @@ def test_successful_run_discovery_adds_only_unrepresented_datasets(
             )
         },
         discovered_run_pages=discovered_pages,
+        run_inputs={
+            "store-run-nt": {"location": "Northern Territory NT"},
+            "store-run-qld": {"location": "Queensland QLD"},
+            "store-run-extra-a": {
+                "location": "Queensland QLD",
+                "classification": "1200",
+            },
+            "store-run-extra-duplicate": {
+                "location": "Queensland QLD",
+                "classification": "1200",
+            },
+            "store-run-extra-b": {"location": "Northern Territory NT"},
+        },
     )
 
     result = _run(
@@ -387,6 +421,25 @@ def test_successful_run_discovery_adds_only_unrepresented_datasets(
     ]
     assert result.supplemental_results_path is not None
     assert result.supplemental_results_path.exists()
+    assert result.supplemental_results[0].state_code == "QLD"
+    assert result.supplemental_results[0].classification_name == "Accounting"
+    assert result.supplemental_results[0].scope_type == "classification"
+    assert result.supplemental_results[1].state_code == "NT"
+    assert result.supplemental_results[1].scope_type == "state"
+
+    demonstration = render_feature_4_demo(
+        Feature4DemoResult(
+            fetch=result,
+            search_config=plan.search_config,
+            actor_id="scrapersdelight/seek-jobs-scraper",
+        )
+    )
+    assert "API authentication:           SUCCESS" in demonstration
+    assert "Raw listings retrieved:       5" in demonstration
+    assert "Queensland QLD" in demonstration
+    assert "Northern Territory NT" in demonstration
+    assert "Duplicates have NOT been removed." in demonstration
+    assert "Overall result:               PASS" in demonstration
 
     resumed_client = NoActorApifyClient(
         "fictional-private-token",

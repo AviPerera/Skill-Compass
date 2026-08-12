@@ -23,7 +23,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Fetch existing Apify backfill datasets without an Actor run."
     )
-    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        help="private 66-scope source CSV; not needed for successful-run discovery",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true")
     parser.add_argument(

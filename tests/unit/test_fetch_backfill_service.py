@@ -19,6 +19,7 @@ from skill_compass.services.fetch_backfill import (
     BackfillFetchStatus,
     ScopeFetchStatus,
     build_backfill_fetch_plan,
+    build_successful_run_fetch_plan,
     fetch_full_backfill,
 )
 
@@ -399,6 +400,44 @@ def test_successful_run_discovery_adds_only_unrepresented_datasets(
     )
     assert resumed.manifest.status is BackfillFetchStatus.COMPLETE
     assert resumed_client.dataset_requests == []
+
+
+def test_discovery_only_fetch_has_no_configured_missing_scopes_and_completes(
+    tmp_path: Path,
+) -> None:
+    plan = build_successful_run_fetch_plan(
+        search_scopes_path=SEARCH_SCOPES_PATH,
+        output_root=tmp_path / "output",
+    )
+    client = NoActorApifyClient(
+        "fictional-private-token",
+        datasets={
+            "dataset-one": FakeDatasetClient(pages=(({"id": "one"},),)),
+            "dataset-two": FakeDatasetClient(pages=(({"id": "two"},),)),
+        },
+        discovered_run_pages=(
+            (
+                _discovered_run("run-one", "dataset-one", minute=1),
+                _discovered_run("run-two", "dataset-two", minute=2),
+            ),
+        ),
+    )
+    events: list[str] = []
+
+    result = _run(
+        plan=plan,
+        client=client,
+        include_all_successful_runs=True,
+        events=events,
+    )
+
+    assert plan.scopes == ()
+    assert result.manifest.expected_scope_count == 0
+    assert result.manifest.missing_scope_count == 0
+    assert result.manifest.successful_supplemental_count == 2
+    assert result.manifest.status is BackfillFetchStatus.COMPLETE
+    assert all("[MISSING]" not in event for event in events)
+    assert result.national_raw_path.read_text(encoding="utf-8").count("\n") == 2
 
 
 def test_supplemental_failure_is_partial_and_later_datasets_are_preserved(

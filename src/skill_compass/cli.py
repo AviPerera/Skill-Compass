@@ -97,7 +97,11 @@ def build_parser() -> argparse.ArgumentParser:
         "fetch-backfill",
         help="fetch all existing national backfill datasets without an Actor",
     )
-    fetch_backfill.add_argument("--manifest", type=Path, required=True)
+    fetch_backfill.add_argument(
+        "--manifest",
+        type=Path,
+        help="private 66-scope source CSV; not needed for successful-run discovery",
+    )
     fetch_backfill.add_argument("--dry-run", action="store_true")
     fetch_backfill.add_argument("--force", action="store_true")
     fetch_backfill.add_argument(

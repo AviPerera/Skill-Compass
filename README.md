@@ -151,15 +151,16 @@ To append datasets from every other successful existing run of the configured
 `scrapersdelight/seek-jobs-scraper` Actor, use the explicit discovery flag:
 
 ```shell
-uv run skill-compass fetch-backfill --manifest data/private/collection_manifests/full_backfill_sources.csv --include-all-successful-runs
+uv run skill-compass fetch-backfill --include-all-successful-runs
 ```
 
 Discovery uses the SDK's paginated successful-run iterator and never starts or
-calls the Actor. Datasets already represented by the configured scope manifest
-are excluded from the supplemental download. Additional raw files are written
-below `supplemental/`, their provenance is recorded in
-`supplemental_results.csv`, and all their raw occurrences are appended after the
-66 configured scope datasets in `national_jobs_raw.jsonl`.
+calls the Actor. This mode does not require or validate the private 66-scope
+manifest. Every distinct dataset discovered from a successful Actor run is
+written below `supplemental/`, its provenance is recorded in
+`supplemental_results.csv`, and every raw occurrence is concatenated into
+`national_jobs_raw.jsonl`. The fetch is `COMPLETE` when discovery succeeds and
+all discovered datasets are fetched successfully.
 
 ## Feature 4C: one-time full national collection
 

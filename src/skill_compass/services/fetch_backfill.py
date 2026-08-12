@@ -162,7 +162,7 @@ class BackfillFetchManifest(FrozenModel):
     backfill_id: str
     profile_code: str
     collection_strategy_version: str
-    source_manifest_path: Path
+    source_manifest_path: Path | None = None
     created_at: datetime
     updated_at: datetime
     status: BackfillFetchStatus
@@ -239,6 +239,7 @@ class BackfillFetchPlan:
     source_manifest: BackfillSourceManifest
     output_root: Path
     backfill_id: str
+    discovery_only: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -297,6 +298,32 @@ def build_backfill_fetch_plan(
         source_manifest=source_manifest,
         output_root=output_root,
         backfill_id=backfill_id,
+    )
+
+
+def build_successful_run_fetch_plan(
+    *,
+    search_scopes_path: Path = DEFAULT_SEARCH_SCOPES_PATH,
+    output_root: Path = DEFAULT_BACKFILL_FETCH_ROOT,
+) -> BackfillFetchPlan:
+    """Build a manifest-free plan whose population is all discovered datasets."""
+    search_config = load_search_scope_config(search_scopes_path)
+    return BackfillFetchPlan(
+        search_config=search_config,
+        scopes=(),
+        source_manifest=BackfillSourceManifest(
+            path=Path("successful_actor_run_discovery"),
+            references=(),
+            missing_scope_ids=(),
+            expected_scope_count=0,
+        ),
+        output_root=output_root,
+        backfill_id=(
+            f"{search_config.profile_code}_"
+            f"{search_config.collection_strategy_version.replace('.', '_')}_"
+            "all_successful_runs"
+        ),
+        discovery_only=True,
     )
 
 
@@ -686,7 +713,9 @@ def _build_batch_manifest(
         backfill_id=plan.backfill_id,
         profile_code=plan.search_config.profile_code,
         collection_strategy_version=plan.search_config.collection_strategy_version,
-        source_manifest_path=plan.source_manifest.path.resolve(),
+        source_manifest_path=(
+            None if plan.discovery_only else plan.source_manifest.path.resolve()
+        ),
         created_at=created_at,
         updated_at=updated_at,
         status=status,
@@ -1022,6 +1051,27 @@ def render_backfill_fetch_dry_run(
     supplemental_actor_id: str | None = None,
 ) -> str:
     """Report manifest readiness without loading a token or constructing a client."""
+    if plan.discovery_only:
+        return "\n".join(
+            [
+                "=" * 79,
+                "SKILL COMPASS — EXISTING APIFY RUN DISCOVERY PLAN",
+                "=" * 79,
+                "",
+                "Actor invocation: NO",
+                "Mode: Existing Apify datasets only",
+                f"Profile: {plan.search_config.profile_code.replace('_', ' ').title()}",
+                "Configured scope validation: NOT APPLICABLE",
+                "Source manifest: NOT REQUIRED",
+                "Supplemental discovery: REQUESTED",
+                f"Supplemental Actor: {supplemental_actor_id or 'N/A'}",
+                "",
+                "DRY RUN ONLY",
+                "Successful-run discovery was not executed.",
+                "No Apify API request made.",
+                "No Actor was invoked.",
+            ]
+        )
     supplied_scope_ids = {item.scope_id for item in plan.source_manifest.references}
     missing_lines = (
         "\n".join(plan.source_manifest.missing_scope_ids)
@@ -1193,7 +1243,7 @@ def render_backfill_fetch_summary(result: BackfillFetchResult) -> str:
 
 def run_fetch_backfill_command(
     *,
-    source_manifest_path: Path,
+    source_manifest_path: Path | None,
     dry_run: bool,
     force: bool,
     include_all_successful_runs: bool = False,
@@ -1204,11 +1254,21 @@ def run_fetch_backfill_command(
 ) -> int:
     """Share script/CLI validation and execution without duplicating business logic."""
     try:
-        plan = build_backfill_fetch_plan(
-            source_manifest_path=source_manifest_path,
-            search_scopes_path=search_scopes_path,
-            output_root=output_root,
-        )
+        if include_all_successful_runs:
+            plan = build_successful_run_fetch_plan(
+                search_scopes_path=search_scopes_path,
+                output_root=output_root,
+            )
+        elif source_manifest_path is not None:
+            plan = build_backfill_fetch_plan(
+                source_manifest_path=source_manifest_path,
+                search_scopes_path=search_scopes_path,
+                output_root=output_root,
+            )
+        else:
+            raise BackfillFetchError(
+                "--manifest is required unless --include-all-successful-runs is used"
+            )
     except (
         BackfillSourceManifestError,
         BackfillFetchError,
@@ -1238,7 +1298,7 @@ def run_fetch_backfill_command(
                 supplemental_actor_id=supplemental_actor_id,
             )
         )
-        return 0 if plan.source_manifest.is_ready else 2
+        return 0 if plan.discovery_only or plan.source_manifest.is_ready else 2
 
     try:
         result = fetch_full_backfill(

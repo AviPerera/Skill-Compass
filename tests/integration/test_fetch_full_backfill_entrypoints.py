@@ -10,14 +10,9 @@ from typing import cast
 import pytest
 
 from skill_compass.cli import main as cli_main
-from skill_compass.collection.search_scopes import (
-    build_search_scopes,
-    load_search_scope_config,
-)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_PATH = PROJECT_ROOT / "scripts/fetch_full_backfill.py"
-SEARCH_SCOPES_PATH = PROJECT_ROOT / "profiles/data_analytics/search_scopes.yaml"
 
 
 def _script_main() -> Callable[[Sequence[str] | None], int]:
@@ -34,28 +29,11 @@ def _script_main() -> Callable[[Sequence[str] | None], int]:
     return cast(Callable[[Sequence[str] | None], int], loaded_module.main)
 
 
-def _write_complete_manifest(path: Path) -> None:
-    """Write fictional references for all currently configured scopes."""
-    scopes = build_search_scopes(load_search_scope_config(SEARCH_SCOPES_PATH))
-    path.write_text(
-        "scope_id,run_id,dataset_id\n"
-        + "".join(
-            f"{scope.scope_id},,fictional-{scope.scope_id}\n" for scope in scopes
-        ),
-        encoding="utf-8",
-    )
-
-
-def test_script_complete_manifest_dry_run_reports_ready_and_zero_requests(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+def test_script_discovery_dry_run_needs_no_manifest_or_api_request(
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    manifest_path = tmp_path / "full_backfill_sources.csv"
-    _write_complete_manifest(manifest_path)
-
     exit_code = _script_main()(
         [
-            "--manifest",
-            str(manifest_path),
             "--dry-run",
             "--include-all-successful-runs",
         ]
@@ -65,10 +43,9 @@ def test_script_complete_manifest_dry_run_reports_ready_and_zero_requests(
     assert exit_code == 0
     assert "Actor invocation: NO" in output
     assert "Mode: Existing Apify datasets only" in output
-    assert "Expected scopes: 66" in output
-    assert "Supplied datasets: 66" in output
-    assert "Missing scopes: 0" in output
-    assert "Manifest ready: YES" in output
+    assert "Configured scope validation: NOT APPLICABLE" in output
+    assert "Source manifest: NOT REQUIRED" in output
+    assert "[MISSING]" not in output
     assert "Supplemental discovery: REQUESTED" in output
     assert "Supplemental Actor: scrapersdelight/seek-jobs-scraper" in output
     assert "Successful-run discovery was not executed." in output

@@ -90,7 +90,7 @@ def parse_arguments(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--dictionary", type=Path, default=DEFAULT_DICTIONARY)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--sample-size", type=positive_integer, default=3)
-    parser.add_argument("--top-skills", type=positive_integer, default=15)
+    parser.add_argument("--top-skills", type=positive_integer, default=25)
     parser.add_argument(
         "--show-plots",
         action="store_true",

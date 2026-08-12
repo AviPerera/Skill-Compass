@@ -168,6 +168,43 @@ The confidence values are deterministic strengths, not statistical
 probabilities or measured accuracy. Seniority and profile-relevance
 classification are not part of Feature 5.
 
+## Feature 6: explainable seniority classification
+
+The governed seniority rules are at
+`profiles/data_analytics/seniority_rules.yaml`. The classifier consumes only
+typed Feature 2 cleaned fields and uses title markers, bounded responsibility
+phrases, years-of-experience evidence, and canonical employment hints. Its
+approved dashboard order is Entry-level, Junior, Mid-level, and Senior.
+Insufficient evidence remains `Unknown`; ambiguous or materially conflicting
+evidence enters `Review`. The graduate-level flag is true only for Entry-level
+and Junior outcomes.
+
+Run the reusable local classification boundary with:
+
+```shell
+uv run skill-compass classify-seniority --input data/processed/national/cleaned_jobs.csv --rules profiles/data_analytics/seniority_rules.yaml --output-dir data/processed/national/seniority_classification
+```
+
+Run the national local-only demonstration with:
+
+```shell
+uv run python scripts/demo_feature_6_seniority_classification.py
+```
+
+The generated seniority-classification directory contains:
+
+- `job_seniority_classifications.csv`
+- `seniority_classification_evidence.csv`
+- `seniority_distribution_summary.csv`
+- `seniority_classification_quality.csv`
+- `seniority_review_queue.csv`
+- `seniority_distribution.png`
+- `seniority_confidence_distribution.png`
+
+Confidence values are deterministic evidence strengths, not probabilities or
+measured accuracy. The command does not call an Actor, make an external API
+request, write to a database, or change role and relevance classifications.
+
 ## Feature 4A: Apify connection test
 
 Copy `.env.example` to a local `.env` and set `APIFY_TOKEN`. The `.env` file is

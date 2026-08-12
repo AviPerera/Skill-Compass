@@ -1,0 +1,171 @@
+profile_code: data_analytics
+seniority_classifier_version: 0.1.0
+seniority_rules_version: 0.1.0
+seniority_output_schema_version: 0.1.0
+
+# Scores are deterministic evidence strengths on 0.0-1.0, not probabilities.
+# Repeated occurrences of a configured term contribute only once per level.
+weights:
+  strong_title: 0.62
+  supporting_title: 0.42
+  context_term: 0.12
+  experience: 0.18
+  employment_hint: 0.10
+  conflicting_title: 0.18
+
+thresholds:
+  minimum_classification_score: 0.60
+  meaningful_evidence_score: 0.30
+  ambiguity_margin: 0.08
+  high_confidence_min: 0.80
+  medium_confidence_min: 0.60
+  experience_conflict_rank_gap: 2
+
+section_multipliers:
+  summary_text_clean: 1.00
+  bullet_points_clean: 0.90
+  description_text_clean: 0.75
+
+# Years are supporting evidence. Cross-band ranges support both endpoint bands
+# and therefore remain reviewable rather than being silently collapsed.
+experience_bands:
+  - seniority_code: entry_level
+    minimum_years: 0
+    maximum_years: 1
+  - seniority_code: junior
+    minimum_years: 2
+    maximum_years: 2
+  - seniority_code: mid_level
+    minimum_years: 3
+    maximum_years: 4
+  - seniority_code: senior
+    minimum_years: 5
+    maximum_years:
+
+max_context_terms_per_level: 3
+max_experience_evidence_per_level: 2
+evidence_term_max_length: 120
+review_evidence_max_length: 480
+
+levels:
+  - seniority_code: entry_level
+    seniority_label: Entry-level
+    rank_order: 1
+    graduate_level_flag: true
+    strong_title_terms:
+      - entry level
+      - graduate
+      - intern
+      - internship
+      - trainee
+      - cadet
+    supporting_title_terms:
+      - early career
+      - graduate program
+      - graduate programme
+    context_terms:
+      - no experience required
+      - recent graduate
+      - graduate program
+      - graduate programme
+      - training provided
+      - first professional role
+    employment_type_hints:
+      - internship
+    conflicting_title_terms:
+      - junior
+      - mid level
+      - intermediate
+      - senior
+      - principal
+      - director
+      - head of
+
+  - seniority_code: junior
+    seniority_label: Junior
+    rank_order: 2
+    graduate_level_flag: true
+    strong_title_terms:
+      - junior
+      - jnr
+    supporting_title_terms:
+      - early career
+    context_terms:
+      - under supervision
+      - work under guidance
+      - foundational experience
+      - develop foundational skills
+    employment_type_hints: []
+    conflicting_title_terms:
+      - entry level
+      - graduate
+      - intern
+      - trainee
+      - mid level
+      - intermediate
+      - senior
+      - principal
+      - director
+      - head of
+
+  - seniority_code: mid_level
+    seniority_label: Mid-level
+    rank_order: 3
+    graduate_level_flag: false
+    strong_title_terms:
+      - mid level
+      - intermediate
+    supporting_title_terms:
+      - experienced analyst
+      - experienced consultant
+    context_terms:
+      - work independently
+      - end to end delivery
+      - manage own workload
+      - established experience
+    employment_type_hints: []
+    conflicting_title_terms:
+      - entry level
+      - graduate
+      - intern
+      - trainee
+      - junior
+      - senior
+      - principal
+      - director
+      - head of
+
+  - seniority_code: senior
+    seniority_label: Senior
+    rank_order: 4
+    graduate_level_flag: false
+    strong_title_terms:
+      - senior
+      - principal
+      - director
+      - head of
+    supporting_title_terms:
+      - lead analyst
+      - lead consultant
+      - analytics lead
+      - data lead
+      - team lead
+      - manager
+    context_terms:
+      - mentor junior
+      - lead delivery
+      - lead the delivery
+      - technical leadership
+      - strategic leadership
+      - people leadership
+      - manage a team
+      - accountable for
+    employment_type_hints: []
+    conflicting_title_terms:
+      - entry level
+      - graduate
+      - intern
+      - trainee
+      - junior
+      - mid level
+      - intermediate

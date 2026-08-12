@@ -22,6 +22,7 @@ from skill_compass.extraction.errors import (
 from skill_compass.mapping.errors import MappingConfigurationError
 from skill_compass.services.apify_connection_test import run_apify_connection_test
 from skill_compass.services.clean_csv import ReconciliationError, process_csv
+from skill_compass.services.clean_jsonl import process_jsonl
 from skill_compass.services.extract_requirements import process_cleaned_csv
 from skill_compass.services.fetch_apify import (
     DEFAULT_FETCH_OUTPUT_ROOT,
@@ -55,6 +56,14 @@ def build_parser() -> argparse.ArgumentParser:
     clean_csv.add_argument("--input", type=Path, required=True)
     clean_csv.add_argument("--mapping", type=Path, required=True)
     clean_csv.add_argument("--output-dir", type=Path, required=True)
+
+    clean_jsonl = subcommands.add_parser(
+        "clean-jsonl",
+        help="map and deterministically clean an existing source JSONL file",
+    )
+    clean_jsonl.add_argument("--input", type=Path, required=True)
+    clean_jsonl.add_argument("--mapping", type=Path, required=True)
+    clean_jsonl.add_argument("--output-dir", type=Path, required=True)
 
     extract = subcommands.add_parser(
         "extract-requirements",
@@ -164,6 +173,36 @@ def run_clean_csv(arguments: argparse.Namespace) -> int:
         return 1
 
     print("clean-csv completed successfully")
+    print(f"Input rows: {result.input_rows}")
+    print(f"Cleaned rows: {len(result.cleaned_jobs)}")
+    print(f"Rejected rows: {result.total_rejected_rows}")
+    print("Reconciliation: PASS")
+    print(f"Output directory: {result.output_dir}")
+    return 0
+
+
+def run_clean_jsonl(arguments: argparse.Namespace) -> int:
+    """Process existing JSONL and explicitly preserve the no-Actor boundary."""
+    try:
+        result = process_jsonl(
+            input_path=arguments.input,
+            mapping_path=arguments.mapping,
+            output_dir=arguments.output_dir,
+        )
+    except (
+        MappingConfigurationError,
+        ReconciliationError,
+        FileNotFoundError,
+        UnicodeError,
+        OSError,
+        ValueError,
+    ) as error:
+        print(f"clean-jsonl failed: {error}")
+        print("Actor invocation: NO")
+        return 1
+
+    print("clean-jsonl completed successfully")
+    print("Actor invocation: NO")
     print(f"Input rows: {result.input_rows}")
     print(f"Cleaned rows: {len(result.cleaned_jobs)}")
     print(f"Rejected rows: {result.total_rejected_rows}")
@@ -309,6 +348,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     if arguments.command == "clean-csv":
         return run_clean_csv(arguments)
+    if arguments.command == "clean-jsonl":
+        return run_clean_jsonl(arguments)
     if arguments.command == "extract-requirements":
         return run_extract_requirements(arguments)
     if arguments.command == "test-apify-connection":

@@ -104,12 +104,26 @@ def resolve_field(
 
 REDACTED_TEXT_FIELDS = frozenset(
     {
+        "advertiser_name_raw",
+        "classification_raw",
+        "company_name_raw",
+        "country_raw",
         "summary_text_raw",
         "description_html_raw",
         "description_text_raw",
+        "employer_name_raw",
+        "location_long_raw",
+        "location_raw",
+        "salary_label_raw",
+        "subclassification_raw",
+        "title_raw",
+        "work_arrangement_raw",
+        "work_type_raw",
     }
 )
-REDACTED_COLLECTION_FIELDS = frozenset({"bullet_points_raw"})
+REDACTED_COLLECTION_FIELDS = frozenset(
+    {"area_hierarchy_raw", "bullet_points_raw", "work_types_raw"}
+)
 EMAIL_PATTERN = re.compile(
     r"(?<![\w.+-])[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}(?![\w.-])",
     re.IGNORECASE,

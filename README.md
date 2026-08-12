@@ -5,9 +5,11 @@ Navigating Australia's Data Analytics Job Market Through Skill Intelligence
 ## Current status
 
 The current implementation provides the reproducible Python environment and
-importable package baseline plus Feature 2 CSV source mapping and deterministic
-cleaning. Feature 3 adds deterministic, evidence-preserving requirement and
-skill extraction from typed Feature 2 cleaned records.
+importable package baseline plus Feature 2 JSONL/CSV source mapping and
+deterministic cleaning. The consolidated `national_jobs_raw.jsonl` is the
+primary national processing input. Feature 3 adds deterministic,
+evidence-preserving requirement and skill extraction from typed Feature 2
+cleaned records.
 
 Feature 4A adds an explicit, five-item-safe Apify connection test and
 conservative result-cap assessment. It does not add national or scheduled
@@ -36,7 +38,32 @@ Verify the installed package and version with:
 uv run python -c "import skill_compass; print(skill_compass.__version__)"
 ```
 
-## Feature 2: CSV mapping and cleaning
+## National processing workflow (no Actor invocation)
+
+After the one-time collection or existing-dataset fetch has created a private
+`national_jobs_raw.jsonl`, process that existing local file through Feature 2:
+
+```shell
+uv run skill-compass clean-jsonl --input data/private/collections/full/<BACKFILL_ID>/national_jobs_raw.jsonl --mapping sources/apify_seek_current/source_mapping.yaml --output-dir data/processed/national
+```
+
+The JSONL adapter reads UTF-8 JSON objects, flattens nested object and array
+paths into the versioned source-mapping contract, and then uses the same
+canonical mapping, deduplication, cleaning, quality, and output logic as the CSV
+adapter. It never starts or reruns an Apify Actor.
+
+Run the implemented Feature 3 extraction stage against the resulting national
+cleaned data:
+
+```shell
+uv run skill-compass extract-requirements --input data/processed/national/cleaned_jobs.csv --profile profiles/data_analytics/profile.yaml --dictionary profiles/data_analytics/requirements.csv --output-dir data/processed/national/skill_extraction
+```
+
+Keep the raw national input and every generated output local and ignored. Role
+and seniority classification are later implementation work and are not included
+in these commands yet.
+
+## Feature 2: CSV demonstration compatibility
 
 Keep the private demonstration input locally at
 `data/private/adelaide_146_jobs_raw.csv`. Never commit private source data.
@@ -60,8 +87,10 @@ The generated local output directory contains:
 - `rejected_jobs.csv`
 - `data_quality_summary.csv`
 
-CSV is the current demonstration boundary. PostgreSQL integration follows in a
-later controlled work item; it is not implemented here.
+CSV remains available for the private 146-row demonstration and sanitised test
+fixtures. National processing uses the JSONL command above. PostgreSQL
+integration follows in a later controlled work item; it is not implemented
+here.
 
 ## Feature 3: requirement and skill extraction
 

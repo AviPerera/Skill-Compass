@@ -10,10 +10,20 @@ from skill_compass.adapters.csv import (
     read_source_csv,
     write_pipeline_outputs,
 )
+from skill_compass.adapters.jsonl import (
+    JsonlReadResult,
+    JsonlSourceRow,
+    flatten_json_object,
+    read_source_jsonl,
+)
 
 __all__ = [
     "CsvReadResult",
     "CsvSourceRow",
+    "JsonlReadResult",
+    "JsonlSourceRow",
+    "flatten_json_object",
     "read_source_csv",
+    "read_source_jsonl",
     "write_pipeline_outputs",
 ]

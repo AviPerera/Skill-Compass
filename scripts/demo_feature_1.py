@@ -293,7 +293,6 @@ def check_project_metadata() -> CheckResult:
     name_is_valid = project.distribution_name == EXPECTED_DISTRIBUTION_NAME
     version_is_valid = project.version == EXPECTED_PACKAGE_VERSION
     requirement_is_valid = project.python_requirement == EXPECTED_PYTHON_REQUIREMENT
-    runtime_is_valid = not project.runtime_dependencies
     tools_are_declared = {"pytest", "ruff"}.issubset(project.development_dependencies)
     layout_is_valid = project.source_layout == EXPECTED_SOURCE_LAYOUT
 
@@ -306,9 +305,15 @@ def check_project_metadata() -> CheckResult:
         requirement_is_valid,
         f"Declared Python requirement: {display_value(project.python_requirement)}",
     )
-    print_status(
-        runtime_is_valid,
-        f"Runtime dependency count: {len(project.runtime_dependencies)}",
+    runtime_dependencies = tuple(
+        sorted(
+            dependency_name(requirement) for requirement in project.runtime_dependencies
+        )
+    )
+    runtime_dependency_names = ", ".join(runtime_dependencies) or "<none>"
+    print(
+        f"[INFO] Runtime dependencies ({len(runtime_dependencies)}): "
+        f"{runtime_dependency_names}"
     )
     dependencies = ", ".join(project.development_dependencies) or "<none>"
     print_status(tools_are_declared, f"Development dependencies: {dependencies}")
@@ -322,7 +327,6 @@ def check_project_metadata() -> CheckResult:
                 name_is_valid,
                 version_is_valid,
                 requirement_is_valid,
-                runtime_is_valid,
                 tools_are_declared,
                 layout_is_valid,
             )

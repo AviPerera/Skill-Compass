@@ -1,0 +1,56 @@
+source_code: apify_seek_current
+actor_id: scrapersdelight/seek-jobs-scraper
+cap_warning_threshold: 500
+
+connection_test:
+  scope_id: connection_test_au_nsw_1204_data_analyst
+  max_items: 5
+  actor_input:
+    alertOnNewJob: false
+    classification: "1204"
+    country: AU
+    diagnose: false
+    fetchDescriptions: true
+    keywords: data analyst
+    location: New South Wales NSW
+    maxItems: 5
+    monitorMode: false
+
+source_job_id_paths:
+  - id
+  - raw/detail/id
+  - raw/listing/id
+  - raw/listing/solMetadata/jobId
+
+# The complete set of 30 classifications supplied for later scoped collection.
+classifications:
+  Accounting: "1200"
+  Administration & Office Support: "6251"
+  Advertising, Arts & Media: "6304"
+  Banking & Financial Services: "1203"
+  Call Centre & Customer Service: "1204"
+  CEO & General Management: "7019"
+  Community Services & Development: "6163"
+  Construction: "1206"
+  Consulting & Strategy: "6076"
+  Design & Architecture: "6263"
+  Education & Training: "6123"
+  Engineering: "1209"
+  Farming, Animals & Conservation: "6205"
+  Government & Defence: "1210"
+  Healthcare & Medical: "1211"
+  Hospitality & Tourism: "1212"
+  Human Resources & Recruitment: "6317"
+  Information & Communication Technology: "6281"
+  Insurance & Superannuation: "1214"
+  Legal: "1216"
+  Manufacturing, Transport & Logistics: "6092"
+  Marketing & Communications: "6008"
+  Mining, Resources & Energy: "6058"
+  Real Estate & Property: "1220"
+  Retail & Consumer Products: "6043"
+  Sales: "6362"
+  Science & Technology: "1223"
+  Self Employment: "6261"
+  Sport & Recreation: "6246"
+  Trades & Services: "1225"

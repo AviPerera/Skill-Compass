@@ -9,6 +9,10 @@ importable package baseline plus Feature 2 CSV source mapping and deterministic
 cleaning. Feature 3 adds deterministic, evidence-preserving requirement and
 skill extraction from typed Feature 2 cleaned records.
 
+Feature 4A adds an explicit, five-item-safe Apify connection test and
+conservative result-cap assessment. It does not add national or scheduled
+collection.
+
 ## Local development
 
 Install Python 3.12 and [uv](https://docs.astral.sh/uv/). Create the local
@@ -90,3 +94,22 @@ The generated extraction directory contains:
 
 PostgreSQL persistence follows in a later controlled feature. Keep private
 inputs and all generated outputs local and ignored; do not commit them.
+
+## Feature 4A: Apify connection test
+
+Copy `.env.example` to a local `.env` and set `APIFY_TOKEN`. The `.env` file is
+ignored and must never be committed. Then run the deliberately bounded test:
+
+```shell
+uv run skill-compass test-apify-connection
+```
+
+The command resolves `scrapersdelight/seek-jobs-scraper`, requests at most five
+test-scope results using the checked-in connection configuration, waits
+for completion, and reports only run metadata and counts. It does not print raw
+listings or invoke mapping, cleaning, extraction, classification, or analysis.
+
+The warning threshold is 500. A count at or above that threshold reports
+`CAP_RISK`, not proven truncation. `CONFIRMED_TRUNCATED` requires explicit,
+verified Actor/source metadata showing that more matches existed than were
+retrieved.

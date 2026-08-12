@@ -11,12 +11,16 @@ import csv
 from collections.abc import Sequence
 from pathlib import Path
 
+from skill_compass.collection.apify_client import ApifyCollectionError
+from skill_compass.collection.seek_adapter import SeekCollectionConfigurationError
+from skill_compass.config.settings import CollectionConfigurationError
 from skill_compass.extraction.errors import (
     ExtractionConfigurationError,
     ExtractionInputError,
     ExtractionReconciliationError,
 )
 from skill_compass.mapping.errors import MappingConfigurationError
+from skill_compass.services.apify_connection_test import run_apify_connection_test
 from skill_compass.services.clean_csv import ReconciliationError, process_csv
 from skill_compass.services.extract_requirements import process_cleaned_csv
 
@@ -45,6 +49,16 @@ def build_parser() -> argparse.ArgumentParser:
     extract.add_argument("--profile", type=Path, required=True)
     extract.add_argument("--dictionary", type=Path, required=True)
     extract.add_argument("--output-dir", type=Path, required=True)
+
+    apify_test = subcommands.add_parser(
+        "test-apify-connection",
+        help="run the explicit five-item SEEK Actor connection test",
+    )
+    apify_test.add_argument(
+        "--config",
+        type=Path,
+        default=Path("sources/apify_seek_current/collection.yaml"),
+    )
     return parser
 
 
@@ -109,6 +123,36 @@ def run_extract_requirements(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def run_test_apify_connection(arguments: argparse.Namespace) -> int:
+    """Run only the bounded Apify test and print no source records or secrets."""
+    try:
+        response = run_apify_connection_test(config_path=arguments.config)
+    except (
+        ApifyCollectionError,
+        CollectionConfigurationError,
+        SeekCollectionConfigurationError,
+        OSError,
+        ValueError,
+    ) as error:
+        print(f"test-apify-connection failed: {error}")
+        return 1
+
+    result = response.result
+    print("=" * 60)
+    print("SKILL COMPASS — APIFY CONNECTION TEST")
+    print("=" * 60)
+    print()
+    print("Actor connection: PASS")
+    print(f"Run status: {result.status}")
+    print(f"Run ID: {result.run_id}")
+    print(f"Dataset ID: {result.dataset_id}")
+    print(f"Items retrieved: {result.returned_item_count}")
+    print(f"Cap assessment: {result.cap_status.value}")
+    print()
+    print("No processing or analysis was executed.")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Dispatch one parsed command and return its process exit code."""
     parser = build_parser()
@@ -117,6 +161,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_clean_csv(arguments)
     if arguments.command == "extract-requirements":
         return run_extract_requirements(arguments)
+    if arguments.command == "test-apify-connection":
+        return run_test_apify_connection(arguments)
     parser.error("unsupported command")
     return 2
 

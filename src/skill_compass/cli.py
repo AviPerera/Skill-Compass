@@ -1,7 +1,7 @@
 """Provide the thin command-line boundary for Skill Compass application services.
 
 This adapter parses arguments and reports safe summaries; it must not contain
-mapping, cleaning, extraction, deduplication, or quality business rules.
+mapping, cleaning, extraction, classification, or quality business rules.
 """
 
 from __future__ import annotations
@@ -11,6 +11,10 @@ import csv
 from collections.abc import Sequence
 from pathlib import Path
 
+from skill_compass.classification.errors import (
+    RoleClassificationError,
+    RoleConfigurationError,
+)
 from skill_compass.collection.apify_client import ApifyCollectionError
 from skill_compass.collection.seek_adapter import SeekCollectionConfigurationError
 from skill_compass.config.settings import CollectionConfigurationError
@@ -21,6 +25,7 @@ from skill_compass.extraction.errors import (
 )
 from skill_compass.mapping.errors import MappingConfigurationError
 from skill_compass.services.apify_connection_test import run_apify_connection_test
+from skill_compass.services.classify_roles import process_role_classification
 from skill_compass.services.clean_csv import ReconciliationError, process_csv
 from skill_compass.services.clean_jsonl import process_jsonl
 from skill_compass.services.extract_requirements import process_cleaned_csv
@@ -73,6 +78,14 @@ def build_parser() -> argparse.ArgumentParser:
     extract.add_argument("--profile", type=Path, required=True)
     extract.add_argument("--dictionary", type=Path, required=True)
     extract.add_argument("--output-dir", type=Path, required=True)
+
+    classify = subcommands.add_parser(
+        "classify-roles",
+        help="classify roles from a Feature 2 cleaned CSV without external calls",
+    )
+    classify.add_argument("--input", type=Path, required=True)
+    classify.add_argument("--rules", type=Path, required=True)
+    classify.add_argument("--output-dir", type=Path, required=True)
 
     apify_test = subcommands.add_parser(
         "test-apify-connection",
@@ -243,6 +256,38 @@ def run_extract_requirements(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def run_classify_roles(arguments: argparse.Namespace) -> int:
+    """Call the role service and print a concise privacy-safe summary."""
+    try:
+        run = process_role_classification(
+            input_path=arguments.input,
+            rules_path=arguments.rules,
+            output_dir=arguments.output_dir,
+        )
+    except (
+        RoleClassificationError,
+        RoleConfigurationError,
+        csv.Error,
+        OSError,
+        ValueError,
+    ) as error:
+        print(f"classify-roles failed: {error}")
+        print("External API requests: 0")
+        return 1
+
+    result = run.classification
+    print("classify-roles completed successfully")
+    print(f"Cleaned input jobs: {result.input_job_count}")
+    print(f"Dashboard-role jobs: {result.quality.classified_into_dashboard_role}")
+    print(f"Other jobs: {result.quality.other_count}")
+    print(f"Review jobs: {result.quality.review_count}")
+    print(f"Evidence rows: {len(result.evidence)}")
+    print("Reconciliation: PASS")
+    print("External API requests: 0")
+    print(f"Output directory: {run.output_dir}")
+    return 0
+
+
 def run_test_apify_connection(arguments: argparse.Namespace) -> int:
     """Run only the bounded Apify test and print no source records or secrets."""
     try:
@@ -352,6 +397,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_clean_jsonl(arguments)
     if arguments.command == "extract-requirements":
         return run_extract_requirements(arguments)
+    if arguments.command == "classify-roles":
+        return run_classify_roles(arguments)
     if arguments.command == "test-apify-connection":
         return run_test_apify_connection(arguments)
     if arguments.command == "fetch-apify":

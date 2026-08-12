@@ -9,7 +9,9 @@ importable package baseline plus Feature 2 JSONL/CSV source mapping and
 deterministic cleaning. The consolidated `national_jobs_raw.jsonl` is the
 primary national processing input. Feature 3 adds deterministic,
 evidence-preserving requirement and skill extraction from typed Feature 2
-cleaned records.
+cleaned records. Feature 5 adds deterministic, configuration-driven role
+classification with bounded evidence, confidence strengths, and explicit
+`Other` and `Review` outcomes.
 
 Feature 4A adds an explicit, five-item-safe Apify connection test and
 conservative result-cap assessment. It does not add national or scheduled
@@ -59,9 +61,15 @@ cleaned data:
 uv run skill-compass extract-requirements --input data/processed/national/cleaned_jobs.csv --profile profiles/data_analytics/profile.yaml --dictionary profiles/data_analytics/requirements.csv --output-dir data/processed/national/skill_extraction
 ```
 
-Keep the raw national input and every generated output local and ignored. Role
-and seniority classification are later implementation work and are not included
-in these commands yet.
+Run the implemented Feature 5 role-classification stage against the same
+canonical cleaned data:
+
+```shell
+uv run skill-compass classify-roles --input data/processed/national/cleaned_jobs.csv --rules profiles/data_analytics/role_rules.yaml --output-dir data/processed/national/role_classification
+```
+
+Keep the raw national input and every generated output local and ignored.
+Seniority classification remains separate later implementation work.
 
 ## Feature 2: CSV demonstration compatibility
 
@@ -123,6 +131,42 @@ The generated extraction directory contains:
 
 PostgreSQL persistence follows in a later controlled feature. Keep private
 inputs and all generated outputs local and ignored; do not commit them.
+
+## Feature 5: explainable role classification
+
+The governed Data Analytics role rules are at
+`profiles/data_analytics/role_rules.yaml`. The reusable classifier consumes only
+typed Feature 2 fields, bounds repeated evidence, retains rule versions and a
+SHA-256 configuration hash, and never makes a network request. The five
+dashboard roles are Data Analyst, Business Analyst, BI Analyst, Reporting
+Analyst, and Data Scientist; uncertain or non-matching jobs remain visible as
+`Review` or `Other`.
+
+Run the reusable classification boundary with:
+
+```shell
+uv run skill-compass classify-roles --input data/processed/demo_2/cleaned_jobs.csv --rules profiles/data_analytics/role_rules.yaml --output-dir data/processed/demo_2/role_classification
+```
+
+Run the national local-only demonstration with:
+
+```shell
+uv run python scripts/demo_feature_5_role_classification.py
+```
+
+The generated role-classification directory contains:
+
+- `job_role_classifications.csv`
+- `role_classification_evidence.csv`
+- `role_distribution_summary.csv`
+- `role_classification_quality.csv`
+- `review_queue.csv`
+- `role_distribution.png`
+- `role_confidence_distribution.png`
+
+The confidence values are deterministic strengths, not statistical
+probabilities or measured accuracy. Seniority and profile-relevance
+classification are not part of Feature 5.
 
 ## Feature 4A: Apify connection test
 

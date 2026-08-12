@@ -1,0 +1,210 @@
+profile_code: data_analytics
+role_classifier_version: 0.1.0
+role_rules_version: 0.1.0
+role_output_schema_version: 0.1.0
+
+# Scores are deterministic evidence strengths on 0.0-1.0, not probabilities.
+# Repeated occurrences of a configured term do not add further weight.
+weights:
+  strong_title: 0.56
+  supporting_title: 0.28
+  context_term: 0.12
+  source_hint: 0.04
+  conflicting_title: 0.18
+  exclusion_title: 0.35
+
+thresholds:
+  minimum_classification_score: 0.64
+  meaningful_evidence_score: 0.25
+  ambiguity_margin: 0.08
+  high_confidence_min: 0.80
+  medium_confidence_min: 0.64
+
+# Context terms contribute once at the strongest section in which they occur.
+section_multipliers:
+  summary_text_clean: 1.00
+  bullet_points_clean: 0.90
+  description_text_clean: 0.75
+
+max_context_terms_per_role: 3
+max_source_hints_per_role: 2
+evidence_term_max_length: 80
+review_evidence_max_length: 480
+
+roles:
+  - role_group_code: data_analyst
+    role_group_label: Data Analyst
+    sort_order: 1
+    strong_title_terms:
+      - data analyst
+      - data insights analyst
+    supporting_title_terms:
+      - analytics analyst
+      - insights analyst
+    context_terms:
+      - data analysis
+      - data analytics
+      - data insights
+      - analyse data
+      - analyze data
+      - data interpretation
+      - quantitative analysis
+      - trends
+      - sql
+      - visualisation
+      - visualization
+      - dashboards
+    source_hint_terms:
+      - analysts
+      - analysis & reporting
+      - market research & analysis
+    conflicting_title_terms:
+      - business analyst
+      - bi analyst
+      - business intelligence analyst
+      - reporting analyst
+      - data scientist
+    exclusion_title_terms:
+      - analytics engineer
+      - data engineer
+      - software engineer
+      - database administrator
+
+  - role_group_code: business_analyst
+    role_group_label: Business Analyst
+    sort_order: 2
+    strong_title_terms:
+      - business analyst
+      - business systems analyst
+      - business process analyst
+    supporting_title_terms:
+      - systems analyst
+      - process analyst
+    context_terms:
+      - requirements gathering
+      - business requirements
+      - functional requirements
+      - solution requirements
+      - stakeholder workshops
+      - stakeholder management
+      - process improvement
+      - process mapping
+      - business process
+    source_hint_terms:
+      - business/systems analysts
+      - management & change consulting
+      - strategy & planning
+    conflicting_title_terms:
+      - data analyst
+      - bi analyst
+      - business intelligence analyst
+      - reporting analyst
+      - data scientist
+    exclusion_title_terms:
+      - analytics engineer
+      - data engineer
+      - software engineer
+      - network engineer
+
+  - role_group_code: bi_analyst
+    role_group_label: BI Analyst
+    sort_order: 3
+    strong_title_terms:
+      - business intelligence analyst
+      - bi analyst
+    supporting_title_terms:
+      - business intelligence specialist
+      - bi specialist
+    context_terms:
+      - business intelligence
+      - power bi
+      - dax
+      - semantic model
+      - semantic modelling
+      - semantic modeling
+      - dashboard development
+      - report development
+      - data warehouse
+      - reporting environment
+    source_hint_terms:
+      - business/systems analysts
+      - database development & administration
+      - analysis & reporting
+    conflicting_title_terms:
+      - data analyst
+      - business analyst
+      - reporting analyst
+      - data scientist
+    exclusion_title_terms:
+      - analytics engineer
+      - data engineer
+      - software engineer
+      - database administrator
+
+  - role_group_code: reporting_analyst
+    role_group_label: Reporting Analyst
+    sort_order: 4
+    strong_title_terms:
+      - performance reporting analyst
+      - reporting analyst
+    supporting_title_terms:
+      - reporting specialist
+      - reporting officer
+    context_terms:
+      - recurring reporting
+      - management reporting
+      - performance reporting
+      - report production
+      - report development
+      - scheduled reports
+      - monthly reporting
+      - regulatory reporting
+    source_hint_terms:
+      - analysis & reporting
+      - financial accounting & reporting
+    conflicting_title_terms:
+      - data analyst
+      - business analyst
+      - bi analyst
+      - business intelligence analyst
+      - data scientist
+    exclusion_title_terms:
+      - analytics engineer
+      - data engineer
+      - software engineer
+      - accountant
+
+  - role_group_code: data_scientist
+    role_group_label: Data Scientist
+    sort_order: 5
+    strong_title_terms:
+      - data scientist
+      - applied data scientist
+    supporting_title_terms:
+      - machine learning scientist
+      - statistical modeller
+      - statistical modeler
+    context_terms:
+      - machine learning
+      - predictive modelling
+      - predictive modeling
+      - statistical modelling
+      - statistical modeling
+      - model development
+      - experimentation
+      - feature engineering
+      - python
+    source_hint_terms:
+      - mathematics, statistics & information sciences
+      - research & fellowships
+    conflicting_title_terms:
+      - data analyst
+      - business analyst
+      - bi analyst
+      - business intelligence analyst
+      - reporting analyst
+    exclusion_title_terms:
+      - analytics engineer
+      - data engineer
+      - software engineer
+      - network engineer

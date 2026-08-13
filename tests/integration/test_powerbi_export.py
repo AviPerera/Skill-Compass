@@ -10,10 +10,14 @@ import shutil
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree
+from zipfile import ZipFile
 
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 from skill_compass.cli import main
+from skill_compass.exports.powerbi_excel import validate_powerbi_workbook
 from skill_compass.exports.powerbi_json import read_powerbi_json
 from skill_compass.services.build_analytics import process_analytics
 from skill_compass.services.classify_profile_relevance import (
@@ -126,12 +130,19 @@ def test_export_writes_one_json_then_matching_excel_contract(tmp_path: Path) -> 
     assert len(workbook.sheetnames) == 30
 
     views = {view.view_name: view for view in document.contract.views}
+    actual_contract_table_names: set[str] = set()
     for view_name in document.contract.view_order:
         worksheet = workbook[view_name]
         column_contracts = views[view_name].columns
         columns = tuple(column.column_name for column in column_contracts)
+        table = worksheet.tables[view_name]
+        actual_contract_table_names.add(table.displayName)
         assert tuple(cell.value for cell in worksheet[1]) == columns
-        assert worksheet.tables[view_name].displayName == view_name
+        assert table.displayName == view_name
+        assert table.ref == (
+            f"A1:{get_column_letter(len(columns))}"
+            f"{max(2, len(document.views[view_name]) + 1)}"
+        )
         assert worksheet.max_row == max(1, len(document.views[view_name]) + 1)
         for excel_row, json_row in zip(
             worksheet.iter_rows(min_row=2, values_only=True),
@@ -149,11 +160,59 @@ def test_export_writes_one_json_then_matching_excel_contract(tmp_path: Path) -> 
                 else:
                     assert actual_value == expected_value
 
+    assert actual_contract_table_names == set(document.contract.view_order)
+    validation = validate_powerbi_workbook(result.excel_path, document)
+    assert validation.expected_sheet_count == validation.actual_sheet_count == 30
+    assert validation.expected_table_count == validation.actual_table_count == 26
+    assert validation.duplicate_table_name_count == 0
+    assert validation.invalid_table_range_count == 0
+    assert validation.missing_contract_column_count == 0
+    assert validation.xml_table_part_count == 29
+
     combined_json = result.json_path.read_text(encoding="utf-8")
     assert "private-" not in combined_json
     assert "fixture-token" not in combined_json
     assert "description_text_clean" not in combined_json
     assert "evidence_snippet" not in combined_json
+
+
+def test_empty_roadmap_tables_use_excel_native_insert_rows(tmp_path: Path) -> None:
+    input_dir = tmp_path / "processed"
+    output_dir = tmp_path / "powerbi"
+    _prepare_upstream(input_dir)
+
+    result = _export(input_dir, output_dir)
+    document = read_powerbi_json(result.json_path)
+    workbook = load_workbook(result.excel_path)
+    expected_empty_tables = {
+        "vw_pathway_skill_priorities": "X",
+        "vw_roadmap_stages": "L",
+    }
+
+    assert all(document.views[name] == () for name in expected_empty_tables)
+    for table_name, final_column in expected_empty_tables.items():
+        worksheet = workbook[table_name]
+        assert set(worksheet.tables) == {table_name}
+        table = worksheet.tables[table_name]
+        assert table.name == table.displayName == table_name
+        assert table.ref == f"A1:{final_column}2"
+        assert table.insertRow is True
+        assert table.autoFilter is not None
+        assert table.autoFilter.ref == table.ref
+        assert all(
+            worksheet.cell(row=2, column=column).value is None
+            for column in range(1, worksheet.max_column + 1)
+        )
+
+    with ZipFile(result.excel_path) as archive:
+        table_parts: dict[str, ElementTree.Element] = {}
+        for part_name in archive.namelist():
+            if part_name.startswith("xl/tables/table") and part_name.endswith(".xml"):
+                root = ElementTree.fromstring(archive.read(part_name))
+                table_parts[root.attrib["displayName"]] = root
+    for table_name, final_column in expected_empty_tables.items():
+        assert table_parts[table_name].attrib["ref"] == f"A1:{final_column}2"
+        assert table_parts[table_name].attrib["insertRow"] == "1"
 
 
 def test_repeated_feature_9_export_has_deterministic_json(tmp_path: Path) -> None:

@@ -22,6 +22,7 @@ from skill_compass.classification.errors import (
 from skill_compass.collection.apify_client import ApifyCollectionError
 from skill_compass.collection.seek_adapter import SeekCollectionConfigurationError
 from skill_compass.config.settings import CollectionConfigurationError
+from skill_compass.exports.powerbi_contract import PowerBiContractError
 from skill_compass.extraction.errors import (
     ExtractionConfigurationError,
     ExtractionInputError,
@@ -37,6 +38,7 @@ from skill_compass.services.classify_roles import process_role_classification
 from skill_compass.services.classify_seniority import process_seniority_classification
 from skill_compass.services.clean_csv import ReconciliationError, process_csv
 from skill_compass.services.clean_jsonl import process_jsonl
+from skill_compass.services.export_powerbi import export_powerbi
 from skill_compass.services.extract_requirements import process_cleaned_csv
 from skill_compass.services.fetch_apify import (
     DEFAULT_FETCH_OUTPUT_ROOT,
@@ -140,6 +142,41 @@ def build_parser() -> argparse.ArgumentParser:
     )
     build_analytics.add_argument("--output-dir", type=Path, required=True)
     build_analytics.add_argument("--minimum-sample-size", type=int, default=20)
+
+    powerbi_export = subcommands.add_parser(
+        "export-powerbi",
+        help="write one validated Power BI JSON source and convert it to Excel",
+    )
+    powerbi_export.add_argument("--input", type=Path, required=True)
+    powerbi_export.add_argument("--output-dir", type=Path, required=True)
+    powerbi_export.add_argument(
+        "--reference-workbook",
+        type=Path,
+        default=Path(
+            "powerbi/reference/"
+            "Skill_Compass_Final_Synthetic_PowerBI_Dataset_100_Jobs.xlsx"
+        ),
+    )
+    powerbi_export.add_argument(
+        "--profile",
+        type=Path,
+        default=Path("profiles/data_analytics/profile.yaml"),
+    )
+    powerbi_export.add_argument(
+        "--dictionary",
+        type=Path,
+        default=Path("profiles/data_analytics/requirements.csv"),
+    )
+    powerbi_export.add_argument(
+        "--role-rules",
+        type=Path,
+        default=Path("profiles/data_analytics/role_rules.yaml"),
+    )
+    powerbi_export.add_argument(
+        "--seniority-rules",
+        type=Path,
+        default=Path("profiles/data_analytics/seniority_rules.yaml"),
+    )
 
     apify_test = subcommands.add_parser(
         "test-apify-connection",
@@ -440,6 +477,35 @@ def run_build_analytics(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def run_export_powerbi(arguments: argparse.Namespace) -> int:
+    """Export the frozen Power BI JSON contract and its Excel conversion."""
+    try:
+        result = export_powerbi(
+            input_dir=arguments.input,
+            output_dir=arguments.output_dir,
+            reference_workbook=arguments.reference_workbook,
+            profile_path=arguments.profile,
+            dictionary_path=arguments.dictionary,
+            role_rules_path=arguments.role_rules,
+            seniority_rules_path=arguments.seniority_rules,
+        )
+    except (PowerBiContractError, csv.Error, OSError, ValueError) as error:
+        print(f"export-powerbi failed: {error}")
+        print("External API requests: 0")
+        return 1
+
+    print("export-powerbi completed successfully")
+    print(f"Contract views: {len(result.view_row_counts)}")
+    print(f"Exported jobs: {result.view_row_counts['vw_jobs']}")
+    print(f"Data as of: {result.data_as_of_at.isoformat()}")
+    print("JSON-to-Excel conversion: PASS")
+    print("Reconciliation: PASS")
+    print("External API requests: 0")
+    print(f"JSON output: {result.json_path}")
+    print(f"Excel output: {result.excel_path}")
+    return 0
+
+
 def run_test_apify_connection(arguments: argparse.Namespace) -> int:
     """Run only the bounded Apify test and print no source records or secrets."""
     try:
@@ -557,6 +623,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_classify_relevance(arguments)
     if arguments.command == "build-analytics":
         return run_build_analytics(arguments)
+    if arguments.command == "export-powerbi":
+        return run_export_powerbi(arguments)
     if arguments.command == "test-apify-connection":
         return run_test_apify_connection(arguments)
     if arguments.command == "fetch-apify":

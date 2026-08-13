@@ -240,6 +240,35 @@ database objects, and do not create or modify a Power BI file. PostgreSQL,
 Alembic migrations, `pbi.vw_*` contracts, and interactive Power BI behaviour
 remain later controlled work items.
 
+## Feature 9: Power BI contract and live export
+
+Feature 9 translates the existing governed Features 2–8 outputs into the
+frozen 26-view Power BI contract. It writes one canonical JSON document first
+and converts only that JSON document into an Excel workbook matching the
+tracked synthetic reference workbook's table names, 314 columns, semantic
+types, relationships and sheet structure.
+
+Run the local live export with:
+
+```shell
+uv run skill-compass export-powerbi --input data/processed/national --output-dir data/processed/national/powerbi
+```
+
+The command writes:
+
+- `skill_compass_powerbi_live.json` — the single canonical export source,
+  including contract metadata and all 26 view collections.
+- `skill_compass_powerbi_live.xlsx` — the JSON-to-Excel conversion with the
+  matching named tables, column order, typed values and live row counts.
+
+Identifiers required by the future PostgreSQL contract use deterministic
+UUIDv5 values. Feature 8's governed role-scoped skill combinations are
+included. `vw_pathway_skill_priorities` and `vw_roadmap_stages` intentionally
+remain empty until their production rules are governed; the workbook retains
+their exact headers and named tables. The export contains no descriptions,
+evidence snippets, contacts or tracking values and makes no external request,
+database write or `.pbix` change.
+
 ## Feature 4A: Apify connection test
 
 Copy `.env.example` to a local `.env` and set `APIFY_TOKEN`. The `.env` file is

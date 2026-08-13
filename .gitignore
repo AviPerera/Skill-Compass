@@ -92,6 +92,8 @@ data/tmp/
 demo_outputs/
 pipeline_outputs/
 exports/
+!src/skill_compass/exports/
+!src/skill_compass/exports/*.py
 
 *apify_export*
 *apify_dataset*

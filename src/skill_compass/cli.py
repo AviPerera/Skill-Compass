@@ -29,6 +29,7 @@ from skill_compass.extraction.errors import (
 )
 from skill_compass.mapping.errors import MappingConfigurationError
 from skill_compass.services.apify_connection_test import run_apify_connection_test
+from skill_compass.services.build_analytics import process_analytics
 from skill_compass.services.classify_profile_relevance import (
     process_profile_relevance,
 )
@@ -111,6 +112,34 @@ def build_parser() -> argparse.ArgumentParser:
     classify_relevance.add_argument("--profile", default="data_analytics")
     classify_relevance.add_argument("--rules", type=Path)
     classify_relevance.add_argument("--output-dir", type=Path, required=True)
+
+    build_analytics = subcommands.add_parser(
+        "build-analytics",
+        help="build channel-neutral analytics from existing local pipeline outputs",
+    )
+    build_analytics.add_argument("--input", type=Path, required=True)
+    build_analytics.add_argument(
+        "--profile",
+        type=Path,
+        default=Path("profiles/data_analytics/profile.yaml"),
+    )
+    build_analytics.add_argument(
+        "--dictionary",
+        type=Path,
+        default=Path("profiles/data_analytics/requirements.csv"),
+    )
+    build_analytics.add_argument(
+        "--role-rules",
+        type=Path,
+        default=Path("profiles/data_analytics/role_rules.yaml"),
+    )
+    build_analytics.add_argument(
+        "--seniority-rules",
+        type=Path,
+        default=Path("profiles/data_analytics/seniority_rules.yaml"),
+    )
+    build_analytics.add_argument("--output-dir", type=Path, required=True)
+    build_analytics.add_argument("--minimum-sample-size", type=int, default=20)
 
     apify_test = subcommands.add_parser(
         "test-apify-connection",
@@ -381,6 +410,36 @@ def run_classify_relevance(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def run_build_analytics(arguments: argparse.Namespace) -> int:
+    """Call Feature 8 and print a concise privacy-safe reconciliation summary."""
+    try:
+        run = process_analytics(
+            input_dir=arguments.input,
+            profile_path=arguments.profile,
+            dictionary_path=arguments.dictionary,
+            role_rules_path=arguments.role_rules,
+            seniority_rules_path=arguments.seniority_rules,
+            output_dir=arguments.output_dir,
+            minimum_sample_size=arguments.minimum_sample_size,
+        )
+    except (csv.Error, OSError, ValueError) as error:
+        print(f"build-analytics failed: {error}")
+        print("External API requests: 0")
+        return 1
+
+    result = run.analytics
+    print("build-analytics completed successfully")
+    print(f"Cleaned input jobs: {result.input_cleaned_job_count}")
+    print(f"Classifier input jobs: {result.classifier_input_job_count}")
+    print(f"Included dashboard jobs: {result.included_job_count}")
+    print(f"Job-skill facts: {len(result.job_skill_facts)}")
+    print(f"Skill combinations: {len(result.skill_combinations)}")
+    print("Reconciliation: PASS")
+    print("External API requests: 0")
+    print(f"Output directory: {run.output_dir}")
+    return 0
+
+
 def run_test_apify_connection(arguments: argparse.Namespace) -> int:
     """Run only the bounded Apify test and print no source records or secrets."""
     try:
@@ -496,6 +555,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_classify_seniority(arguments)
     if arguments.command == "classify-relevance":
         return run_classify_relevance(arguments)
+    if arguments.command == "build-analytics":
+        return run_build_analytics(arguments)
     if arguments.command == "test-apify-connection":
         return run_test_apify_connection(arguments)
     if arguments.command == "fetch-apify":

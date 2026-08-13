@@ -11,7 +11,10 @@ primary national processing input. Feature 3 adds deterministic,
 evidence-preserving requirement and skill extraction from typed Feature 2
 cleaned records. Feature 5 adds deterministic, configuration-driven role
 classification with bounded evidence, confidence strengths, and explicit
-`Other` and `Review` outcomes.
+`Other` and `Review` outcomes. Features 6 and 7 add governed seniority and
+profile-relevance classifications. Feature 8 joins those local outputs into
+privacy-safe, channel-neutral analytics and provides a 22-artifact static
+dashboard demonstration.
 
 Feature 4A adds an explicit, five-item-safe Apify connection test and
 conservative result-cap assessment. It does not add national or scheduled
@@ -69,7 +72,6 @@ uv run skill-compass classify-roles --input data/processed/national/cleaned_jobs
 ```
 
 Keep the raw national input and every generated output local and ignored.
-Seniority classification remains separate later implementation work.
 
 ## Feature 2: CSV demonstration compatibility
 
@@ -204,6 +206,39 @@ The generated seniority-classification directory contains:
 Confidence values are deterministic evidence strengths, not probabilities or
 measured accuracy. The command does not call an Actor, make an external API
 request, write to a database, or change role and relevance classifications.
+
+## Feature 8: channel-neutral analytics and dashboard visual demo
+
+Feature 8 joins the existing canonical cleaned, requirement, role, seniority,
+and relevance outputs by `source_code + source_job_id`. It exports distinct-job
+measures, governed role and seniority summaries, location and employment
+distributions, and skill pair/triple metrics without descriptions, evidence,
+contacts, or tracking values.
+
+Build only the reusable analytics outputs with:
+
+```shell
+uv run skill-compass build-analytics --input data/processed/national --output-dir data/processed/national/analytics
+```
+
+Generate the complete six-page, 22-artifact static dashboard demonstration with:
+
+```shell
+uv run python scripts/demo_dashboard_visuals.py
+```
+
+The demo writes analytics CSV/JSON files, page-grouped PNGs, and
+`dashboard_visual_manifest.json` below the ignored local directory
+`data/processed/national/dashboard_demo/`. Pages 1–4 and the skill-combination
+visual on page 5 use Feature 8 national analytics. The page 5 priority matrix
+and learning stages are explicitly labelled synthetic/provisional because the
+approved production weighting and difficulty contract has not yet been
+implemented. Page 6 describes the implemented local workflow.
+
+Both commands are local-only: they make no external API request, write no
+database objects, and do not create or modify a Power BI file. PostgreSQL,
+Alembic migrations, `pbi.vw_*` contracts, and interactive Power BI behaviour
+remain later controlled work items.
 
 ## Feature 4A: Apify connection test
 

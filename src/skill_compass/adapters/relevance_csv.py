@@ -33,7 +33,14 @@ from skill_compass.schemas.extraction import JobRequirementMatch
 
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-SEQUENCE_FIELDS = frozenset({"matched_sections", "matched_aliases", "quality_flags"})
+SEQUENCE_FIELDS = frozenset(
+    {
+        "matched_sections",
+        "matched_aliases",
+        "quality_flags",
+        "relevance_quality_flags",
+    }
+)
 OPTIONAL_FIELDS = frozenset(
     {
         "candidate_role_1_code",
@@ -106,6 +113,11 @@ def read_seniority_classifications_csv(
 def read_job_requirement_matches_csv(path: Path) -> tuple[JobRequirementMatch, ...]:
     """Read stable Feature 3 distinct job-requirement rows."""
     return _read_model_csv(path, JobRequirementMatch, "requirement match")
+
+
+def read_profile_relevance_csv(path: Path) -> tuple[JobProfileRelevance, ...]:
+    """Read stable Feature 7 final profile-relevance decisions."""
+    return _read_model_csv(path, JobProfileRelevance, "profile relevance")
 
 
 # =============================================================================

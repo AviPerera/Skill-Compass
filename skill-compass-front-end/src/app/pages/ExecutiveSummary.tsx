@@ -46,7 +46,6 @@ export default function ExecutiveSummary() {
   const topRole = roleData[0];
   const topState = stateData[0];
   const graduateCount = jobs.filter((job) => job.graduate_level_flag).length;
-  const unknownSeniority = jobs.filter((job) => job.seniority_name === "Unknown").length;
 
   return (
     <div style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -92,7 +91,7 @@ export default function ExecutiveSummary() {
             topSkills.length >= 3 ? `${topSkills[0].name}, ${topSkills[1].name}, and ${topSkills[2].name} are the three most frequently requested skills in this filter context.` : "Skill demand is calculated from distinct job-to-skill matches.",
             roleData.length >= 2 ? `${roleData[0].name} and ${roleData[1].name} account for ${formatPercent(roleData[0].value + roleData[1].value, jobs.length)} of the selected listings.` : "Role counts use distinct job advertisements.",
             stateData.length >= 2 ? `${stateData[0].name} and ${stateData[1].name} account for ${formatPercent(stateData[0].value + stateData[1].value, jobs.length)} of the selected listings.` : "Location demand uses each job's canonical primary state.",
-            `${formatPercent(unknownSeniority, jobs.length)} of selected jobs have unknown seniority; graduate-level findings should be read with that coverage limitation.`,
+            "Unclassified role and seniority labels are hidden from categorical breakdowns, while overall totals retain every advertisement.",
           ]} />
         </div>
       </div>

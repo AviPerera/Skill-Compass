@@ -6,7 +6,7 @@
   "scripts": {
     "data:build": "node scripts/build-dashboard-data.mjs",
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node scripts/build-sites-worker.mjs",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

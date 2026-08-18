@@ -8,6 +8,12 @@ import {
   type DashboardDocument,
 } from "./data/dashboardData";
 
+const dashboard = dashboardDocument as unknown as DashboardDocument;
+const totalJobs = dashboard.views.vw_jobs.length;
+const dataAnalystJobs = dashboard.views.vw_jobs.filter((job) => job.role_group_name === "Data Analyst").length;
+const dataScientistJobs = dashboard.views.vw_jobs.filter((job) => job.role_group_name === "Data Scientist").length;
+const southAustralianJobs = dashboard.views.vw_jobs.filter((job) => job.state_code === "SA").length;
+
 function renderDashboard() {
   return render(
     <DashboardDataProvider>
@@ -24,7 +30,7 @@ describe("Skill Compass dashboard", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => dashboardDocument as unknown as DashboardDocument,
+      json: async () => dashboard,
     }));
   });
 
@@ -36,17 +42,19 @@ describe("Skill Compass dashboard", () => {
   it("loads the governed snapshot and filters the executive page", async () => {
     renderDashboard();
 
-    expect(await screen.findByText(/748 Job Advertisements Analysed/)).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`))).toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText("Role Type"), "Data Analyst");
 
-    expect(screen.getByText(/Showing:/).parentElement).toHaveTextContent("80 job advertisements");
+    expect(screen.getByText(/Showing:/).parentElement).toHaveTextContent(`${dataAnalystJobs} job advertisements`);
     expect(screen.getAllByText("Data Analyst").length).toBeGreaterThan(0);
-    expect(screen.getByText("80", { selector: "div" })).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Total Job Ads").parentElement!).getByText(String(dataAnalystJobs)),
+    ).toBeInTheDocument();
   });
 
   it("applies the skill category to cards, charts, matrix, and table", async () => {
     renderDashboard();
-    await screen.findByText(/748 Job Advertisements Analysed/);
+    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
     await openPage("Skills Analysis");
     await userEvent.selectOptions(screen.getByLabelText("Skill Category"), "Soft Skills");
 
@@ -57,29 +65,29 @@ describe("Skill Compass dashboard", () => {
 
   it("updates every role view when a role chip is selected", async () => {
     renderDashboard();
-    await screen.findByText(/748 Job Advertisements Analysed/);
+    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
     await openPage("Role Analysis");
     await userEvent.click(screen.getByRole("button", { name: "Data Scientist" }));
 
-    expect(screen.getByText("28 listings (100%)")).toBeInTheDocument();
+    expect(screen.getByText(`${dataScientistJobs} listings (100%)`)).toBeInTheDocument();
     expect(screen.getByText(/Data Scientist profile/)).toBeInTheDocument();
   });
 
   it("filters location KPIs, rankings, charts, and map", async () => {
     renderDashboard();
-    await screen.findByText(/748 Job Advertisements Analysed/);
+    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
     await openPage("Location Insights");
     await userEvent.selectOptions(screen.getByLabelText("State"), "SA");
 
     const highestDemandCard = screen.getByText("Highest Demand State").parentElement;
     expect(highestDemandCard).toHaveTextContent("SA");
-    expect(highestDemandCard).toHaveTextContent("27 job ads");
+    expect(highestDemandCard).toHaveTextContent(`${southAustralianJobs} job ads`);
     expect(screen.getByText("STATE RANKING").parentElement).toHaveTextContent("SA");
   });
 
   it("switches governed pathway evidence and preserves unavailable states", async () => {
     renderDashboard();
-    await screen.findByText(/748 Job Advertisements Analysed/);
+    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
     await openPage("Graduate Roadmap");
     await userEvent.click(screen.getByRole("button", { name: "Business Analyst" }));
 
@@ -91,12 +99,12 @@ describe("Skill Compass dashboard", () => {
 
   it("renders the governed methodology inventory", async () => {
     renderDashboard();
-    await screen.findByText(/748 Job Advertisements Analysed/);
+    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
     await openPage("Methodology");
 
     expect(screen.getByText("Implemented Data Workflow")).toBeInTheDocument();
     expect(screen.getByText("Tools & Technologies")).toBeInTheDocument();
     expect(screen.getByText("Known Limitations")).toBeInTheDocument();
-    expect(within(screen.getByText("CURRENT JOBS").parentElement!).getByText("748")).toBeInTheDocument();
+    expect(within(screen.getByText("CURRENT JOBS").parentElement!).getByText(String(totalJobs))).toBeInTheDocument();
   });
 });

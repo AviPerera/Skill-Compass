@@ -241,7 +241,7 @@ export default function RoleAnalysis() {
           <InsightCard bullets={[
             mostCommon ? `${mostCommon.name} is the largest role group in the current filter context with ${mostCommon.value.toLocaleString()} jobs.` : "No jobs match the current filters.",
             highestVariety ? `${highestVariety.name} has the highest observed skill variety at an average of ${highestVariety.value} distinct skills per advertisement.` : "Skill variety cannot be calculated for this selection.",
-            `${formatPercent(jobs.filter((job) => job.seniority_name === "Unknown").length, jobs.length)} of selected jobs have unknown seniority, so seniority comparisons retain an explicit coverage warning.`,
+            "Unclassified role and seniority labels are hidden from category comparisons, while overall totals retain every advertisement.",
           ]} />
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { colors, chartColors } from "../components/shared";
 import { formatDate, useDashboardData } from "../data/dashboardData";
 
+const repositoryUrl = "https://github.com/AviPerera/Skill-Compass";
+
 export default function Methodology() {
   const { data } = useDashboardData();
   const document = data!;
@@ -67,9 +69,9 @@ export default function Methodology() {
             </div>
           </div>
 
-          <div style={{ background: "#fff", borderRadius: 8, padding: "10px 12px", boxShadow: "0 1px 4px rgba(0,0,0,0.07)", flex: 1, overflow: "hidden" }}>
+          <div style={{ background: "#fff", borderRadius: 8, padding: "10px 12px", boxShadow: "0 1px 4px rgba(0,0,0,0.07)", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: colors.nearBlack, marginBottom: 8 }}>Known Limitations</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, overflowY: "auto", paddingRight: 4 }}>
               {limitations.map((limitation) => (
                 <div key={String(limitation.limitation_code)} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
                   <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, background: "#FEF3C7", border: "1px solid #FDE68A", display: "grid", placeItems: "center", fontSize: 9, fontWeight: 700, color: "#92400E", marginTop: 1 }}>!</div>
@@ -80,6 +82,30 @@ export default function Methodology() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div style={{ background: colors.softLime, border: "1px solid #BEF264", borderRadius: 8, padding: "10px 12px", boxShadow: "0 1px 4px rgba(0,0,0,0.07)", flexShrink: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: colors.nearBlack, marginBottom: 5 }}>Project Repository</div>
+            <a
+              href={repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "block", marginBottom: 7, color: colors.forestGreen, fontSize: 8, fontWeight: 600, overflowWrap: "anywhere" }}
+            >
+              {repositoryUrl}
+            </a>
+            <a
+              href={repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Skill Compass GitHub repository"
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "7px 10px", borderRadius: 5, background: "#24292F", color: "#fff", fontSize: 9, fontWeight: 700, textDecoration: "none" }}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                <path d="M12 .7A11.5 11.5 0 0 0 8.36 23.1c.58.1.79-.25.79-.56v-2.23c-3.24.7-3.92-1.37-3.92-1.37-.53-1.35-1.29-1.71-1.29-1.71-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.41-1.27.74-1.56-2.58-.29-5.3-1.29-5.3-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0C17.03 4.99 18 5.3 18 5.3c.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.72 5.39-5.31 5.68.42.36.79 1.07.79 2.16v3.26c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z" />
+              </svg>
+              View on GitHub
+            </a>
           </div>
 
           <div style={{ background: colors.forestGreen, borderRadius: 8, padding: "10px 12px", flexShrink: 0 }}>

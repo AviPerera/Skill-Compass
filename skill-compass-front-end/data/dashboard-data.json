@@ -48403,13 +48403,6 @@
     ],
     "vw_limitations": [
       {
-        "limitation_code": "roadmap_pending",
-        "limitation_title": "Roadmap calculations pending",
-        "limitation_text": "Pathway priorities and roadmap stages remain empty until governed production rules are implemented.",
-        "severity": "high",
-        "sort_order": 1
-      },
-      {
         "limitation_code": "advertised_market",
         "limitation_title": "Advertised market only",
         "limitation_text": "The analysis covers advertised jobs and not the full hidden labour market.",
@@ -48425,8 +48418,8 @@
       },
       {
         "limitation_code": "title_variation",
-        "limitation_title": "Inconsistent job titles",
-        "limitation_text": "Role classification must use job text because titles can be ambiguous.",
+        "limitation_title": "Inconsistent job titles - Ex: Data Guru or Data Magician",
+        "limitation_text": "Role classification must use job descriptions and use rule based classification because titles can be ambiguous.",
         "severity": "medium",
         "sort_order": 4
       },
@@ -48440,8 +48433,15 @@
       {
         "limitation_code": "snapshot",
         "limitation_title": "Time-sensitive findings",
-        "limitation_text": "Findings represent the frozen analysis period and may change over time.",
+        "limitation_text": "Findings that would be valid for the analysis period may change over time.",
         "severity": "medium",
+        "sort_order": 7
+      },
+      {
+        "limitation_code": "manual_review_exclusions",
+        "limitation_title": "Manual Review Exclusions",
+        "limitation_text": "Jobs with uncertain relevance or classification are excluded from dashboard analysis until manually reviewed and validated.",
+        "severity": "info",
         "sort_order": 7
       }
     ],

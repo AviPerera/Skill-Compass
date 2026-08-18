@@ -105,6 +105,20 @@ describe("Skill Compass dashboard", () => {
     expect(screen.getByText("Implemented Data Workflow")).toBeInTheDocument();
     expect(screen.getByText("Tools & Technologies")).toBeInTheDocument();
     expect(screen.getByText("Known Limitations")).toBeInTheDocument();
+    expect(screen.queryByText("Roadmap calculations pending")).not.toBeInTheDocument();
+    expect(screen.getByText("Inconsistent job titles - Ex: Data Guru or Data Magician")).toBeInTheDocument();
+    expect(screen.getByText("Role classification must use job descriptions and use rule based classification because titles can be ambiguous.")).toBeInTheDocument();
+    expect(screen.getByText("Findings that would be valid for the analysis period may change over time.")).toBeInTheDocument();
+    expect(screen.getByText("Manual Review Exclusions")).toBeInTheDocument();
+    expect(screen.getByText("Jobs with uncertain relevance or classification are excluded from dashboard analysis until manually reviewed and validated.")).toBeInTheDocument();
+    expect(screen.getByText("https://github.com/AviPerera/Skill-Compass")).toHaveAttribute(
+      "href",
+      "https://github.com/AviPerera/Skill-Compass",
+    );
+    expect(screen.getByRole("link", { name: "Open Skill Compass GitHub repository" })).toHaveAttribute(
+      "target",
+      "_blank",
+    );
     expect(within(screen.getByText("CURRENT JOBS").parentElement!).getByText(String(totalJobs))).toBeInTheDocument();
   });
 });

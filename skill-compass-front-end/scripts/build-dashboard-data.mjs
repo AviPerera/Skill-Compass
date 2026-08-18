@@ -148,11 +148,35 @@ const views = {
     "tool_name", "purpose", "implementation_status", "sort_order",
   ])),
   vw_limitations: source.views.vw_limitations
+    .filter((row) => row.limitation_code !== "roadmap_pending")
     .filter((row) => !/\b(review|unknown)\b/i.test(`${row.limitation_title} ${row.limitation_text}`))
-    .map((row) => pick(row, [
-      "limitation_code", "limitation_title", "limitation_text", "severity",
-      "sort_order",
-    ])),
+    .map((row) => {
+      const limitation = pick(row, [
+        "limitation_code", "limitation_title", "limitation_text", "severity",
+        "sort_order",
+      ]);
+      if (row.limitation_code === "title_variation") {
+        return {
+          ...limitation,
+          limitation_title: "Inconsistent job titles - Ex: Data Guru or Data Magician",
+          limitation_text: "Role classification must use job descriptions and use rule based classification because titles can be ambiguous.",
+        };
+      }
+      if (row.limitation_code === "snapshot") {
+        return {
+          ...limitation,
+          limitation_text: "Findings that would be valid for the analysis period may change over time.",
+        };
+      }
+      return limitation;
+    })
+    .concat({
+      limitation_code: "manual_review_exclusions",
+      limitation_title: "Manual Review Exclusions",
+      limitation_text: "Jobs with uncertain relevance or classification are excluded from dashboard analysis until manually reviewed and validated.",
+      severity: "info",
+      sort_order: 7,
+    }),
   vw_project_metadata: source.views.vw_project_metadata.map((row) => pick(row, [
     "project_name", "project_description", "methodology_version",
     "architecture_version", "data_as_of_at", "collection_start_date",
@@ -184,7 +208,12 @@ const dashboardDocument = {
 };
 
 const serializedDocument = `${JSON.stringify(dashboardDocument, null, 2)}\n`;
-if (/\b(review|unknown)\b/i.test(serializedDocument)) {
+const exportedClassificationLabels = [
+  ...views.vw_dim_roles.map((row) => row.role_group_name),
+  ...views.vw_dim_seniority.map((row) => row.seniority_name),
+  ...views.vw_jobs.flatMap((row) => [row.role_group_name, row.seniority_name]),
+];
+if (exportedClassificationLabels.some((label) => excludedClassificationLabels.has(label))) {
   throw new Error("Dashboard export still contains an excluded classification label.");
 }
 

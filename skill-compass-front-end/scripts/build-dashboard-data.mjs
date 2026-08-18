@@ -75,20 +75,10 @@ const pick = (row, fields) => Object.fromEntries(
   fields.map((field) => [field, row[field]]),
 );
 const views = {
-  vw_dim_analysis_period: source.views.vw_dim_analysis_period,
-  vw_dim_roles: source.views.vw_dim_roles
-    .filter((row) => !excludedClassificationLabels.has(row.role_group_name))
-    .map((row) => pick(row, [
-      "role_group_id", "role_group_name", "business_oriented_flag",
-      "graduate_friendly_flag", "supported_pathway_flag", "sort_order",
-    ])),
-  vw_dim_seniority: source.views.vw_dim_seniority
-    .filter((row) => !excludedClassificationLabels.has(row.seniority_name))
-    .map((row) => pick(row, [
-      "seniority_level_id", "seniority_name", "rank_order",
-      "graduate_level_flag",
-    ])),
-  vw_dim_geography: source.views.vw_dim_geography,
+  vw_dim_analysis_period: [],
+  vw_dim_roles: [],
+  vw_dim_seniority: [],
+  vw_dim_geography: [],
   vw_dim_employment_types: source.views.vw_dim_employment_types.map((row) => pick(row, [
     "employment_type_id", "employment_type_name", "sort_order",
   ])),
@@ -112,15 +102,9 @@ const views = {
     "job_id", "skill_id", "skill_name", "skill_category_name",
     "dashboard_group_name",
   ])),
-  vw_job_locations: filterJobBridge("vw_job_locations").map((row) => pick(row, [
-    "job_id", "geography_id", "is_primary",
-  ])),
-  vw_job_employment_types: filterJobBridge("vw_job_employment_types").map((row) => pick(row, [
-    "job_id", "employment_type_id", "is_primary",
-  ])),
-  vw_job_work_modes: filterJobBridge("vw_job_work_modes").map((row) => pick(row, [
-    "job_id", "work_mode_id", "is_primary",
-  ])),
+  vw_job_locations: [],
+  vw_job_employment_types: [],
+  vw_job_work_modes: [],
   vw_pathway_skill_priorities: source.views.vw_pathway_skill_priorities,
   vw_skill_combinations: source.views.vw_skill_combinations.map((row) => pick(row, [
     "pathway_id", "combination_label", "supporting_job_count",
@@ -140,10 +124,8 @@ const views = {
     "step_code", "step_order", "input_record_count", "output_record_count",
     "status",
   ])),
-  vw_data_quality_metrics: source.views.vw_data_quality_metrics.filter(
-    (row) => !/\b(review|unknown)\b/i.test(JSON.stringify(row)),
-  ),
-  vw_validation_metrics: source.views.vw_validation_metrics,
+  vw_data_quality_metrics: [],
+  vw_validation_metrics: [],
   vw_technology_tools: source.views.vw_technology_tools.map((row) => pick(row, [
     "tool_name", "purpose", "implementation_status", "sort_order",
   ])),
@@ -188,11 +170,6 @@ const dashboardDocument = {
   schema_version: "1.0.0",
   source_contract_version: source.contract?.contract_version ?? "unknown",
   data_as_of_at: source.data_as_of_at,
-  source: {
-    name: "Skill Compass Feature 9 Power BI export",
-    path: "data/processed/national/powerbi/skill_compass_powerbi_live.json",
-    privacy: "Presentation-safe export: no descriptions, evidence snippets, contacts, or tracking values.",
-  },
   coverage: {
     analytical_pages: "available",
     methodology_page: "available",
@@ -215,6 +192,9 @@ const exportedClassificationLabels = [
 ];
 if (exportedClassificationLabels.some((label) => excludedClassificationLabels.has(label))) {
   throw new Error("Dashboard export still contains an excluded classification label.");
+}
+if (/\b(?:description_html|description_text|evidence_snippet|contact_email|contact_phone|searchRequestToken|solMetadata)\b/i.test(serializedDocument)) {
+  throw new Error("Dashboard export contains a prohibited private-source field.");
 }
 
 await mkdir(dirname(outputPath), { recursive: true });

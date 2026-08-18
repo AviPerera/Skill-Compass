@@ -5,6 +5,11 @@ node_modules/
 # Production build
 dist/
 .sites-git/
+.vercel/
+
+# Temporary local audit/build output
+.tmp/
+*.tmp
 
 # Local environment files
 .env

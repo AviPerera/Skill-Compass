@@ -39,6 +39,23 @@ describe("Skill Compass dashboard", () => {
     vi.unstubAllGlobals();
   });
 
+  it("publishes only the presentation-safe frontend data contract", () => {
+    const publicDocument = dashboard as unknown as Record<string, unknown>;
+    const serialized = JSON.stringify(dashboard);
+
+    expect(publicDocument.source).toBeUndefined();
+    expect(dashboard.views.vw_dim_analysis_period).toEqual([]);
+    expect(dashboard.views.vw_dim_roles).toEqual([]);
+    expect(dashboard.views.vw_dim_seniority).toEqual([]);
+    expect(dashboard.views.vw_dim_geography).toEqual([]);
+    expect(dashboard.views.vw_job_locations).toEqual([]);
+    expect(dashboard.views.vw_job_employment_types).toEqual([]);
+    expect(dashboard.views.vw_job_work_modes).toEqual([]);
+    expect(dashboard.views.vw_data_quality_metrics).toEqual([]);
+    expect(dashboard.views.vw_validation_metrics).toEqual([]);
+    expect(serialized).not.toMatch(/description_html|description_text|evidence_snippet|contact_email|contact_phone|searchRequestToken|solMetadata/i);
+  });
+
   it("loads the governed snapshot and filters the executive page", async () => {
     renderDashboard();
 

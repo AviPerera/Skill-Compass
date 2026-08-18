@@ -219,12 +219,13 @@ interface ReportHeaderProps {
 }
 
 const navPages = [
-  "Executive Summary",
-  "Skills Analysis",
-  "Role Analysis",
-  "Location Insights",
-  "Graduate Roadmap",
-  "Methodology",
+  { label: "Executive Summary", pageIndex: 0 },
+  { label: "Skills Analysis", pageIndex: 1 },
+  { label: "Role Analysis", pageIndex: 2 },
+  { label: "Location Insights", pageIndex: 3 },
+  // Temporary: retain the implemented page while its governed outputs are completed.
+  { label: "Graduate Roadmap", pageIndex: 4, isVisible: false },
+  { label: "Methodology", pageIndex: 5 },
 ];
 
 export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, totalJobs }: ReportHeaderProps) {
@@ -258,8 +259,13 @@ export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, t
       </div>
       {/* Nav buttons */}
       <div style={{ display: "flex", paddingLeft: 8 }}>
-        {navPages.map((page, i) => (
-          <NavButton key={page} label={page} active={i === currentPage} onClick={() => onPageChange(i)} />
+        {navPages.filter((page) => page.isVisible !== false).map((page) => (
+          <NavButton
+            key={page.label}
+            label={page.label}
+            active={page.pageIndex === currentPage}
+            onClick={() => onPageChange(page.pageIndex)}
+          />
         ))}
       </div>
     </div>

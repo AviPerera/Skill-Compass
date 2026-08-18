@@ -85,16 +85,12 @@ describe("Skill Compass dashboard", () => {
     expect(screen.getByText("STATE RANKING").parentElement).toHaveTextContent("SA");
   });
 
-  it("switches governed pathway evidence and preserves unavailable states", async () => {
+  it("temporarily hides the Graduate Roadmap navigation entry", async () => {
     renderDashboard();
     await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`));
-    await openPage("Graduate Roadmap");
-    await userEvent.click(screen.getByRole("button", { name: "Business Analyst" }));
 
-    expect(screen.getByText("Business Analyst profile")).toBeInTheDocument();
-    expect(screen.getByText("Skill Priority Matrix unavailable")).toBeInTheDocument();
-    expect(screen.getByText("Learning Roadmap unavailable")).toBeInTheDocument();
-    expect(screen.getAllByText("SMALL SAMPLE").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Graduate Roadmap" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Skill Priority Matrix unavailable")).not.toBeInTheDocument();
   });
 
   it("renders the governed methodology inventory", async () => {

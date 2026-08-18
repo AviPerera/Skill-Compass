@@ -262,3 +262,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.openai
+
+skill-compass/skill-compass-front-end/.openai/

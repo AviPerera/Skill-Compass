@@ -61,7 +61,7 @@ export default function ExecutiveSummary() {
 
       <div style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
         <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
-          <KPICard label="Total Job Ads" value={jobs.length.toLocaleString()} sub="Current filter context" accent={colors.forestGreen} />
+          <KPICard label="Total Job Ads" value={jobs.length.toLocaleString()} accent={colors.forestGreen} />
           <KPICard label="Top Skill" value={topSkill?.name ?? "No data"} sub={topSkill ? `${topSkill.value}% of job ads` : undefined} accent={colors.limeGreen} />
           <KPICard label="Most Common Role" value={topRole?.name ?? "No data"} sub={topRole ? `${formatPercent(topRole.value, jobs.length)} of listings` : undefined} accent={colors.emerald} />
           <KPICard label="Highest Demand State" value={topState?.name ?? "No data"} sub={topState ? `${topState.value.toLocaleString()} job ads` : undefined} accent={colors.teal} />

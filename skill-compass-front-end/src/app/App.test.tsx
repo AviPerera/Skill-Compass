@@ -42,7 +42,7 @@ describe("Skill Compass dashboard", () => {
   it("loads the governed snapshot and filters the executive page", async () => {
     renderDashboard();
 
-    expect(await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`))).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`))).toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText("Role Type"), "Data Analyst");
 
     expect(screen.getByText(/Showing:/).parentElement).toHaveTextContent(`${dataAnalystJobs} job advertisements`);
@@ -54,7 +54,7 @@ describe("Skill Compass dashboard", () => {
 
   it("applies the skill category to cards, charts, matrix, and table", async () => {
     renderDashboard();
-    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
+    await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`));
     await openPage("Skills Analysis");
     await userEvent.selectOptions(screen.getByLabelText("Skill Category"), "Soft Skills");
 
@@ -65,7 +65,7 @@ describe("Skill Compass dashboard", () => {
 
   it("updates every role view when a role chip is selected", async () => {
     renderDashboard();
-    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
+    await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`));
     await openPage("Role Analysis");
     await userEvent.click(screen.getByRole("button", { name: "Data Scientist" }));
 
@@ -75,7 +75,7 @@ describe("Skill Compass dashboard", () => {
 
   it("filters location KPIs, rankings, charts, and map", async () => {
     renderDashboard();
-    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
+    await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`));
     await openPage("Location Insights");
     await userEvent.selectOptions(screen.getByLabelText("State"), "SA");
 
@@ -87,7 +87,7 @@ describe("Skill Compass dashboard", () => {
 
   it("switches governed pathway evidence and preserves unavailable states", async () => {
     renderDashboard();
-    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
+    await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`));
     await openPage("Graduate Roadmap");
     await userEvent.click(screen.getByRole("button", { name: "Business Analyst" }));
 
@@ -99,7 +99,7 @@ describe("Skill Compass dashboard", () => {
 
   it("renders the governed methodology inventory", async () => {
     renderDashboard();
-    await screen.findByText(new RegExp(`${totalJobs} Job Advertisements Analysed`));
+    await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`));
     await openPage("Methodology");
 
     expect(screen.getByText("Implemented Data Workflow")).toBeInTheDocument();

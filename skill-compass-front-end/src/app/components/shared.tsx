@@ -247,10 +247,10 @@ export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, t
           }}>A</div>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>
-              Australian Data Analytics Skills Insights
+              Skill Compass - Navigating Australia’s Data Analytics Job Market Through Skill Intelligence
             </div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.65)" }}>
-              {pageTitle} • Data as of {dataAsOf} • {totalJobs.toLocaleString()} Job Advertisements Analysed
+              {pageTitle} • Data as of {dataAsOf} • 3,088 Collected → 3,028 Validated → Python Pipeline (Skill Extraction &amp; Classification) → {totalJobs.toLocaleString()} Eligible &amp; Relevant Jobs Analysed
             </div>
           </div>
         </div>

@@ -60,6 +60,14 @@ describe("Skill Compass dashboard", () => {
     renderDashboard();
 
     expect(await screen.findByText(new RegExp(`${totalJobs} Eligible & Relevant Jobs Analysed`))).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Connect with Avi Perera on LinkedIn" })).toHaveAttribute(
+      "href",
+      "https://www.linkedin.com/in/aviperera/",
+    );
+    expect(screen.getByRole("link", { name: "Connect with Avi Perera on LinkedIn" })).toHaveAttribute(
+      "target",
+      "_blank",
+    );
     await userEvent.selectOptions(screen.getByLabelText("Role Type"), "Data Analyst");
 
     expect(screen.getByText(/Showing:/).parentElement).toHaveTextContent(`${dataAnalystJobs} job advertisements`);

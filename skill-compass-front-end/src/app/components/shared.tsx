@@ -255,7 +255,42 @@ export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, t
             </div>
           </div>
         </div>
-        <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>University Capstone Project</div>
+        <a
+          href="https://www.linkedin.com/in/aviperera/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Connect with Avi Perera on LinkedIn"
+          style={{
+            minWidth: 254,
+            padding: "6px 10px",
+            borderRadius: 6,
+            background: colors.limeGreen,
+            color: colors.forestGreen,
+            textDecoration: "none",
+            flexShrink: 0,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+          }}
+        >
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.04em", lineHeight: 1.2 }}>
+            UNIVERSITY CAPSTONE PROJECT
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2, fontSize: 10, fontWeight: 600, lineHeight: 1.2 }}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              style={{ flexShrink: 0 }}
+            >
+              <rect width="24" height="24" rx="3" fill="#0A66C2" />
+              <path
+                fill="#FFFFFF"
+                d="M7.38 8.73H4.24V19h3.14V8.73ZM5.81 4A1.83 1.83 0 1 0 5.8 7.66 1.83 1.83 0 0 0 5.81 4Zm13.95 9.11c0-3.09-1.65-4.53-3.86-4.53a3.33 3.33 0 0 0-3.02 1.66v-1.51H9.74V19h3.14v-5.09c0-1.34.25-2.64 1.91-2.64 1.64 0 1.66 1.53 1.66 2.73v5h3.14l.17-5.89Z"
+              />
+            </svg>
+            <span>Design &amp; Analysis by Avi Perera · LinkedIn ↗</span>
+          </div>
+        </a>
       </div>
       {/* Nav buttons */}
       <div style={{ display: "flex", paddingLeft: 8 }}>

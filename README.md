@@ -60,17 +60,17 @@ The React dashboard can run independently from the Python package. The repositor
 ## Requirements
 
 - Node.js **20 or newer**
-- npm, which is included with Node.js
-- pnpm 10+ is optional
+- pnpm **10 or newer** (recommended because the repository includes `pnpm-lock.yaml`)
+- npm, which is included with Node.js, may be used as an alternative
 
 ## Start the dashboard
 
 From the repository root:
 
 ```powershell
-cd frontend
-npm install
-npm run dev
+cd skill-compass-front-end
+pnpm install
+pnpm dev
 ```
 
 Open the address printed by Vite, normally:
@@ -93,7 +93,7 @@ The dashboard contains six pages:
 ```text
 Skill Compass Python outputs
         ↓
-frontend/data/dashboard-data.json
+skill-compass-front-end/data/dashboard-data.json
         ↓
 React filtering and aggregation
         ↓
@@ -106,17 +106,17 @@ The dashboard can therefore be opened and explored **without rerunning the Pytho
 
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start the local development server |
-| `npm run typecheck` | Check the TypeScript source |
-| `npm run build` | Type-check and create the production build |
-| `npm run preview` | Preview the production build locally |
-| `npm run data:build` | Regenerate `dashboard-data.json` from the latest Feature 9 export |
+| `pnpm dev` | Start the local development server |
+| `pnpm typecheck` | Check the TypeScript source |
+| `pnpm build` | Type-check and create the production build |
+| `pnpm preview` | Preview the production build locally |
+| `pnpm data:build` | Regenerate `dashboard-data.json` from the latest Feature 9 export |
 
-If you prefer pnpm:
+If you prefer npm:
 
 ```powershell
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ---
@@ -276,15 +276,30 @@ uv run skill-compass classify-seniority `
 
 ## 8. Run profile relevance — Feature 7
 
-Feature 7 creates the `Included`, `Excluded` and `Review` analytical population used by Feature 8 and the dashboard.
-
-The older README did not document the exact Feature 7 CLI command. Before publishing or changing this section, confirm the command exposed by the current package with:
+Feature 7 classifies every canonical job as `Included`, `Excluded` or `Review` using the governed relevance rules and the existing Feature 2, 3, 5 and 6 outputs. Run it manually with:
 
 ```powershell
-uv run skill-compass --help
+uv run skill-compass classify-relevance `
+  --input data/processed/national `
+  --profile data_analytics `
+  --rules profiles/data_analytics/relevance_rules.yaml `
+  --output-dir data/processed/national/profile_relevance
 ```
 
-Run the profile-relevance command before continuing to Feature 8.
+Main outputs:
+
+```text
+data/processed/national/profile_relevance/
+├── job_profile_relevance.csv
+├── profile_relevance_evidence.csv
+├── profile_relevance_summary.csv
+├── profile_relevance_review_queue.csv
+└── profile_relevance_diagnostics.csv
+```
+
+Feature 8 uses only records whose Feature 7 `relevance_status` is `included`. `Excluded` and relevance-`Review` records remain in the governed outputs for reconciliation and manual validation but do not enter the 748-job analytical denominator.
+
+`Unknown` is not a Feature 7 relevance status. It is a governed role/seniority classification outcome from Features 5 and 6. An otherwise relevance-`Included` job may retain an `Unknown` or `Review` role/seniority outcome in the backend governance outputs; the frontend keeps the job in overall totals but hides those values from categorical filters and charts.
 
 ---
 
@@ -321,14 +336,14 @@ The export reproduces the governed Power BI contract, including the expected tab
 After generating a new Feature 9 export, refresh the frontend dataset with:
 
 ```powershell
-cd frontend
-npm run data:build
+cd skill-compass-front-end
+pnpm data:build
 ```
 
 Then start the dashboard again:
 
 ```powershell
-npm run dev
+pnpm dev
 ```
 
 ---
@@ -347,7 +362,7 @@ For example, to adapt the project from Data Analytics to Accounting, Cybersecuri
 | `profiles/data_analytics/requirements.csv` | Changing the skills, tools, qualifications, aliases and requirement categories to extract. |
 | `profiles/data_analytics/role_rules.yaml` | Changing the role groups and the evidence/rules used to classify them. |
 | `profiles/data_analytics/seniority_rules.yaml` | Changing seniority labels, title markers, experience rules or review logic. |
-| `profiles/data_analytics/pathway_rules.yaml` | Changing career pathways, roadmap priorities or pathway-specific rules. |
+| `profiles/data_analytics/pathway_rules.yaml` | **Planned for the next phase.** It will govern career pathways, roadmap priorities and pathway-specific difficulty or sequencing rules when implemented. This file is not present in the current repository. |
 | `sources/apify_seek_current/source_mapping.yaml` | **Only** when the source/Actor or source field names change. |
 
 Recommended approach:
@@ -358,15 +373,15 @@ profiles/
 │   ├── profile.yaml
 │   ├── requirements.csv
 │   ├── role_rules.yaml
-│   ├── seniority_rules.yaml
-│   └── pathway_rules.yaml
+│   └── seniority_rules.yaml
 └── your_new_profile/
     ├── profile.yaml
     ├── requirements.csv
     ├── role_rules.yaml
-    ├── seniority_rules.yaml
-    └── pathway_rules.yaml
+    └── seniority_rules.yaml
 ```
+
+Governed pathway priority, difficulty and learning-stage configuration will be implemented in the next phase. Until then, do not create placeholder `pathway_rules.yaml` files or infer roadmap recommendations from job advertisements alone.
 
 ### If the source stays the same
 
@@ -394,7 +409,7 @@ The central cleaning, extraction, classification and analytics modules should re
 
 ```text
 skill-compass/
-├── frontend/                       # React + Vite dashboard
+├── skill-compass-front-end/         # React + Vite dashboard
 │   ├── data/
 │   │   └── dashboard-data.json
 │   ├── src/
@@ -422,7 +437,7 @@ skill-compass/
 ├── data/
 │   ├── private/                    # Private/raw source data — ignored
 │   └── processed/                  # Generated processing outputs
-├── powerbi/                        # Power BI files/contracts
+├── powerbi/                        # Power BI reference workbook
 ├── docs/                           # Architecture, methodology and project documentation
 ├── pyproject.toml
 ├── uv.lock
@@ -436,7 +451,7 @@ skill-compass/
 - Do not commit `.env`, API tokens or private source datasets.
 - Raw job descriptions, contact information and tracking fields should not be exposed through the dashboard data contract.
 - Skill Compass analyses **advertised job-market demand**. It does not represent every Australian vacancy or the hidden job market.
-- `Unknown`, `Other` and `Review` outcomes are intentionally retained when evidence is insufficient instead of forcing a classification.
+- Backend governance outputs retain `Unknown`, `Other` and `Review` outcomes when evidence is insufficient instead of forcing a classification. The frontend retains relevance-included jobs in overall totals but hides `Unknown` and `Review` role/seniority values from categorical filters and charts.
 
 ---
 
@@ -463,16 +478,16 @@ uv run skill-compass --help
 ## Dashboard
 
 ```powershell
-cd frontend
-npm install
-npm run dev
+cd skill-compass-front-end
+pnpm install
+pnpm dev
 ```
 
 ## Rebuild dashboard data
 
 ```powershell
-cd frontend
-npm run data:build
+cd skill-compass-front-end
+pnpm data:build
 ```
 
 ---

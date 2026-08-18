@@ -22,3 +22,470 @@ select,
 textarea {
   font: inherit;
 }
+
+/*
+ * The report keeps its original 1280 x 720 presentation layout on desktop.
+ * Below that canvas width, content returns to normal document flow instead of
+ * shrinking the complete report (and its text) with a transform.
+ */
+@media (max-width: 1199px) {
+  html,
+  body,
+  #root {
+    height: auto;
+    min-height: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    background: #f8faf5;
+  }
+
+  .dashboard-viewport {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh;
+    display: block !important;
+    overflow: visible !important;
+    background: #f8faf5 !important;
+  }
+
+  .dashboard-canvas {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh;
+    transform: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  .dashboard-canvas,
+  .dashboard-page,
+  .page-content,
+  .kpi-grid,
+  .chart-grid {
+    max-width: 100%;
+  }
+
+  .report-title-row {
+    align-items: flex-start !important;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .report-brand,
+  .report-heading {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .report-title,
+  .report-summary {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .report-brand {
+    flex: 1 1 600px;
+  }
+
+  .report-attribution {
+    min-width: 230px !important;
+    margin-left: auto;
+  }
+
+  .report-nav {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-button {
+    min-height: 38px;
+    flex: 0 0 auto;
+  }
+
+  .slicer-bar {
+    flex-wrap: wrap;
+    row-gap: 8px !important;
+  }
+
+  .slicer-control {
+    min-width: 190px;
+  }
+
+  .slicer-select {
+    min-height: 34px;
+    min-width: 0;
+    max-width: 190px;
+  }
+
+  .role-chip-row {
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slicer-chip {
+    min-height: 34px;
+    flex: 0 0 auto;
+  }
+
+  .filter-result-count {
+    flex-basis: 100%;
+    margin-left: 0 !important;
+  }
+
+  .dashboard-page,
+  .page-content {
+    flex: none !important;
+    min-height: 0;
+    overflow: visible !important;
+  }
+
+  .kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .kpi-card {
+    width: 100%;
+    min-height: 92px;
+  }
+
+  .chart-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: none !important;
+    grid-auto-rows: minmax(270px, auto);
+    flex: none !important;
+    overflow: visible !important;
+  }
+
+  .chart-grid > .chart-card {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 270px;
+  }
+
+  .chart-card,
+  .chart-card-body {
+    overflow: visible !important;
+  }
+
+  .chart-card-body {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .responsive-table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .simple-table {
+    min-width: 650px;
+  }
+
+  .matrix-table table {
+    min-width: 520px;
+  }
+
+  .insight-section {
+    margin-bottom: 12px;
+  }
+
+  .methodology-content,
+  .methodology-main,
+  .methodology-sidebar,
+  .methodology-steps-grid {
+    overflow: visible !important;
+  }
+
+  .methodology-content {
+    min-height: 0;
+  }
+
+  .methodology-main {
+    min-width: 0;
+  }
+
+  .methodology-steps-grid {
+    grid-auto-rows: minmax(170px, auto);
+    flex: none !important;
+  }
+
+  .methodology-workflow {
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .methodology-workflow-card {
+    min-width: 120px;
+  }
+
+  .roadmap-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    flex: none !important;
+  }
+
+  .roadmap-grid > div {
+    min-height: 260px;
+    overflow: visible !important;
+  }
+
+  .roadmap-filter-bar {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .report-title {
+    font-size: 15px !important;
+  }
+
+  .report-summary {
+    font-size: 11px !important;
+    line-height: 1.4;
+  }
+
+  .report-attribution {
+    width: 100%;
+    min-width: 0 !important;
+    margin-left: 40px;
+  }
+
+  .methodology-content {
+    flex-direction: column;
+  }
+
+  .methodology-sidebar {
+    width: 100% !important;
+  }
+
+  .methodology-sidebar > * {
+    flex: none !important;
+  }
+
+  .roadmap-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .report-title-row {
+    padding: 12px 14px !important;
+  }
+
+  .report-brand {
+    width: 100%;
+    flex-basis: 100%;
+    align-items: flex-start !important;
+    gap: 9px !important;
+  }
+
+  .report-mark {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 auto;
+  }
+
+  .report-title {
+    font-size: 16px !important;
+    line-height: 1.3 !important;
+  }
+
+  .report-summary {
+    margin-top: 6px;
+    font-size: 12px !important;
+    line-height: 1.45;
+  }
+
+  .report-attribution {
+    margin-left: 41px;
+    font-size: 12px !important;
+  }
+
+  .report-nav {
+    padding-left: 6px !important;
+  }
+
+  .nav-button {
+    min-height: 44px;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+  }
+
+  .slicer-bar {
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+  }
+
+  .roadmap-filter-bar {
+    padding: 10px 14px !important;
+  }
+
+  .roadmap-filter-bar > :last-child {
+    flex-basis: 100%;
+    margin-left: 0 !important;
+  }
+
+  .slicer-bar > :first-child {
+    flex-basis: 100%;
+  }
+
+  .slicer-control {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 220px;
+    justify-content: space-between;
+  }
+
+  .slicer-control > span {
+    font-size: 11px !important;
+  }
+
+  .slicer-select {
+    flex: 1;
+    width: 100%;
+    min-width: 0 !important;
+    max-width: none;
+    min-height: 42px;
+    font-size: 14px !important;
+  }
+
+  .slicer-chip {
+    min-height: 42px;
+    padding: 7px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .page-content,
+  .methodology-content {
+    padding: 12px !important;
+  }
+
+  .kpi-label,
+  .kpi-subtitle {
+    font-size: 12px !important;
+  }
+
+  .kpi-value {
+    font-size: 22px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .chart-card-title {
+    padding: 11px 12px !important;
+    font-size: 14px !important;
+  }
+
+  .chart-card-body {
+    padding: 12px !important;
+  }
+
+  .hbar-label {
+    width: 96px !important;
+    font-size: 11px !important;
+  }
+
+  .simple-table,
+  .matrix-table table {
+    font-size: 11px !important;
+  }
+
+  .insight-card {
+    padding: 12px 14px !important;
+  }
+
+  .insight-card div {
+    line-height: 1.45;
+  }
+
+  .methodology-steps-grid {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .report-attribution {
+    margin-left: 0;
+  }
+
+  .slicer-control {
+    display: grid !important;
+    grid-template-columns: 72px minmax(0, 1fr);
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .role-chip-row {
+    flex-basis: 100%;
+  }
+
+  .role-chip-row + div {
+    display: none;
+  }
+
+  .kpi-grid,
+  .chart-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .kpi-card {
+    min-height: 100px;
+  }
+
+  .chart-grid {
+    grid-auto-rows: minmax(300px, auto);
+  }
+
+  .chart-grid > .chart-card {
+    min-height: 300px;
+  }
+
+  .donut-chart {
+    flex-direction: column;
+    align-items: center !important;
+  }
+
+  .seniority-chart-layout,
+  .australia-map-layout {
+    flex-direction: column;
+    overflow: visible !important;
+  }
+
+  .seniority-chart-layout > div,
+  .state-ranking {
+    width: 100% !important;
+  }
+
+  .australia-map-layout > svg {
+    width: 100%;
+    min-height: 320px;
+  }
+
+  .state-ranking {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .state-ranking > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .methodology-workflow {
+    align-items: stretch !important;
+  }
+}

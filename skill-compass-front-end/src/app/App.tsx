@@ -51,6 +51,7 @@ export default function App() {
 
   return (
     <div
+      className="dashboard-viewport"
       style={{
         width: "100vw",
         height: "100vh",
@@ -63,6 +64,7 @@ export default function App() {
       }}
     >
       <div
+        className="dashboard-canvas"
         style={{
           width: CANVAS_W,
           height: CANVAS_H,

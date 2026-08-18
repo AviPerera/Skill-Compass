@@ -34,7 +34,7 @@ interface KPICardProps {
 
 export function KPICard({ label, value, sub, accent = colors.forestGreen }: KPICardProps) {
   return (
-    <div style={{
+    <div className="kpi-card" style={{
       background: "#fff",
       borderRadius: 8,
       padding: "10px 14px",
@@ -46,9 +46,9 @@ export function KPICard({ label, value, sub, accent = colors.forestGreen }: KPIC
       flex: 1,
       minWidth: 0,
     }}>
-      <div style={{ fontSize: 10, color: colors.medGrey, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: colors.nearBlack, lineHeight: 1.1 }}>{value}</div>
-      {sub && <div style={{ fontSize: 10, color: colors.medGrey, marginTop: 2 }}>{sub}</div>}
+      <div className="kpi-label" style={{ fontSize: 10, color: colors.medGrey, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>{label}</div>
+      <div className="kpi-value" style={{ fontSize: 24, fontWeight: 700, color: colors.nearBlack, lineHeight: 1.1 }}>{value}</div>
+      {sub && <div className="kpi-subtitle" style={{ fontSize: 10, color: colors.medGrey, marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -62,7 +62,7 @@ interface ChartCardProps {
 
 export function ChartCard({ title, children, style }: ChartCardProps) {
   return (
-    <div style={{
+    <div className="chart-card" style={{
       background: "#fff",
       borderRadius: 8,
       boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
@@ -72,7 +72,7 @@ export function ChartCard({ title, children, style }: ChartCardProps) {
       overflow: "hidden",
       ...style,
     }}>
-      <div style={{
+      <div className="chart-card-title" style={{
         padding: "8px 12px",
         borderBottom: `1px solid ${colors.lightGrey}`,
         fontSize: 12,
@@ -80,7 +80,7 @@ export function ChartCard({ title, children, style }: ChartCardProps) {
         color: colors.darkGrey,
         background: "#FAFAFA",
       }}>{title}</div>
-      <div style={{ flex: 1, padding: "8px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <div className="chart-card-body" style={{ flex: 1, padding: "8px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {children}
       </div>
     </div>
@@ -95,7 +95,7 @@ interface InsightCardProps {
 
 export function InsightCard({ bullets, title = "Key Insights" }: InsightCardProps) {
   return (
-    <div style={{
+    <div className="insight-card" style={{
       background: colors.softLime,
       borderRadius: 8,
       padding: "10px 14px",
@@ -124,6 +124,7 @@ interface SlicerChipProps {
 export function SlicerChip({ label, selected, onClick }: SlicerChipProps) {
   return (
     <button
+      className="slicer-chip"
       onClick={onClick}
       type="button"
       aria-pressed={selected}
@@ -154,9 +155,10 @@ interface SlicerDropdownProps {
 
 export function SlicerDropdown({ label, options, value, onChange }: SlicerDropdownProps) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div className="slicer-control" style={{ display: "flex", alignItems: "center", gap: 6 }}>
       <span style={{ fontSize: 10, color: colors.medGrey, fontWeight: 600, textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</span>
       <select
+        className="slicer-select"
         aria-label={label}
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -187,6 +189,7 @@ interface NavButtonProps {
 export function NavButton({ label, active, onClick }: NavButtonProps) {
   return (
     <button
+      className="nav-button"
       onClick={onClick}
       type="button"
       aria-current={active ? "page" : undefined}
@@ -230,32 +233,33 @@ const navPages = [
 
 export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, totalJobs }: ReportHeaderProps) {
   return (
-    <div style={{ background: colors.forestGreen, flexShrink: 0 }}>
+    <header className="report-header" style={{ background: colors.forestGreen, flexShrink: 0 }}>
       {/* Top title bar */}
-      <div style={{
+      <div className="report-title-row" style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         padding: "8px 20px",
         borderBottom: "1px solid rgba(255,255,255,0.15)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
+        <div className="report-brand" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="report-mark" style={{
             width: 28, height: 28, borderRadius: 4,
             background: colors.limeGreen,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 14, fontWeight: 800, color: colors.forestGreen,
           }}>A</div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>
+          <div className="report-heading">
+            <div className="report-title" style={{ fontSize: 14, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>
               Skill Compass - Navigating Australia’s Data Analytics Job Market Through Skill Intelligence
             </div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.65)" }}>
+            <div className="report-summary" style={{ fontSize: 10, color: "rgba(255,255,255,0.65)" }}>
               {pageTitle} • Data as of {dataAsOf} • 3,088 Collected → 3,028 Validated → Python Pipeline (Skill Extraction &amp; Classification) → {totalJobs.toLocaleString()} Eligible &amp; Relevant Jobs Analysed
             </div>
           </div>
         </div>
         <a
+          className="report-attribution"
           href="https://www.linkedin.com/in/aviperera/"
           target="_blank"
           rel="noreferrer"
@@ -293,7 +297,7 @@ export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, t
         </a>
       </div>
       {/* Nav buttons */}
-      <div style={{ display: "flex", paddingLeft: 8 }}>
+      <nav className="report-nav" aria-label="Dashboard pages" style={{ display: "flex", paddingLeft: 8 }}>
         {navPages.filter((page) => page.isVisible !== false).map((page) => (
           <NavButton
             key={page.label}
@@ -302,8 +306,8 @@ export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, t
             onClick={() => onPageChange(page.pageIndex)}
           />
         ))}
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 }
 
@@ -314,7 +318,7 @@ interface SlicerBarProps {
 
 export function SlicerBar({ children }: SlicerBarProps) {
   return (
-    <div style={{
+    <div className="slicer-bar" style={{
       background: "#fff",
       borderBottom: `1px solid ${colors.lightGrey}`,
       padding: "6px 20px",
@@ -339,10 +343,10 @@ interface HBarProps {
 export function HBarList({ data, maxValue, unit = "%" }: HBarProps) {
   const max = Math.max(1, maxValue ?? Math.max(0, ...data.map(d => d.value)));
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, justifyContent: "space-evenly" }}>
+    <div className="hbar-list" style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, justifyContent: "space-evenly" }}>
       {data.map((item, i) => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ fontSize: 10, color: colors.darkGrey, width: 110, textAlign: "right", flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
+          <div className="hbar-label" style={{ fontSize: 10, color: colors.darkGrey, width: 110, textAlign: "right", flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
           <div style={{ flex: 1, background: colors.lightGrey, borderRadius: 2, height: 14, overflow: "hidden" }}>
             <div style={{
               width: `${(item.value / max) * 100}%`,
@@ -382,7 +386,7 @@ export function DonutChart({ data, size = 120 }: DonutProps) {
   });
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, justifyContent: "center" }}>
+    <div className="donut-chart" style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, justifyContent: "center" }}>
       <svg width={size} height={size} style={{ flexShrink: 0 }}>
         {segments.map((seg, i) => (
           <circle
@@ -455,8 +459,8 @@ interface SimpleTableProps {
 
 export function SimpleTable({ columns, rows, accentCol }: SimpleTableProps) {
   return (
-    <div style={{ overflow: "auto", flex: 1 }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
+    <div className="responsive-table" style={{ overflow: "auto", flex: 1 }}>
+      <table className="simple-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
         <thead>
           <tr style={{ background: colors.forestGreen }}>
             {columns.map((col, i) => (
@@ -506,7 +510,7 @@ export function MatrixHeatmap({ rows, cols, data }: MatrixProps) {
   };
 
   return (
-    <div style={{ overflow: "auto", flex: 1 }}>
+    <div className="responsive-table matrix-table" style={{ overflow: "auto", flex: 1 }}>
       <table style={{ borderCollapse: "collapse", fontSize: 9, width: "100%" }}>
         <thead>
           <tr>

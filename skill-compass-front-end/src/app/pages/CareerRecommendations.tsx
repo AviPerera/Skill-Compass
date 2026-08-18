@@ -39,8 +39,8 @@ export default function CareerRecommendations() {
     .slice(0, 6);
 
   return (
-    <div style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ background: "#fff", borderBottom: `1px solid ${colors.lightGrey}`, padding: "6px 20px", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+    <div className="dashboard-page" style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div className="roadmap-filter-bar" style={{ background: "#fff", borderBottom: `1px solid ${colors.lightGrey}`, padding: "6px 20px", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: colors.forestGreen, textTransform: "uppercase", marginRight: 4 }}>Choose pathway:</div>
         {pathways.map((pathway) => {
           const id = String(pathway.pathway_id);
@@ -49,8 +49,8 @@ export default function CareerRecommendations() {
         <div style={{ marginLeft: "auto", fontSize: 9, color: colors.medGrey }}>Evidence-based sections only</div>
       </div>
 
-      <div style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr 0.9fr", gap: 10, flex: 1, minHeight: 0 }}>
+      <div className="page-content" style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
+        <div className="roadmap-grid" style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr 0.9fr", gap: 10, flex: 1, minHeight: 0 }}>
           <div style={{ background: "#fff", borderRadius: 8, padding: "12px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: colors.forestGreen, textTransform: "uppercase", marginBottom: 3 }}>Governed role profile</div>
             <div style={{ fontSize: 16, fontWeight: 750, color: colors.nearBlack, marginBottom: 5 }}>{profile?.profile_title ?? roleName}</div>

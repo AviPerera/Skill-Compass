@@ -14,18 +14,18 @@ export default function Methodology() {
   const completedSteps = pipeline.filter((row) => row.status === "completed" || row.status === "success").length;
 
   return (
-    <div style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ flex: 1, padding: "12px 16px", display: "flex", gap: 12, overflow: "hidden" }}>
-        <div style={{ flex: 1.6, display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
+    <div className="dashboard-page" style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div className="methodology-content" style={{ flex: 1, padding: "12px 16px", display: "flex", gap: 12, overflow: "hidden" }}>
+        <div className="methodology-main" style={{ flex: 1.6, display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
           <div style={{ background: "#fff", borderRadius: 8, padding: "10px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.07)", flexShrink: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: colors.nearBlack }}>Implemented Data Workflow</div>
               <div style={{ fontSize: 9, color: colors.medGrey }}>{completedSteps}/{pipeline.length} recorded pipeline steps complete</div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <div className="methodology-workflow" style={{ display: "flex", alignItems: "center", gap: 3 }}>
               {steps.map((step, index) => (
-                <div key={String(step.step_code)} style={{ display: "contents" }}>
-                  <div style={{ flex: 1, background: index === steps.length - 1 ? colors.softLime : colors.lightBg, border: `1px solid ${index === steps.length - 1 ? "#BEF264" : colors.lightGrey}`, borderRadius: 6, padding: "7px 6px", textAlign: "center" }}>
+                <div className="methodology-workflow-item" key={String(step.step_code)} style={{ display: "contents" }}>
+                  <div className="methodology-workflow-card" style={{ flex: 1, background: index === steps.length - 1 ? colors.softLime : colors.lightBg, border: `1px solid ${index === steps.length - 1 ? "#BEF264" : colors.lightGrey}`, borderRadius: 6, padding: "7px 6px", textAlign: "center" }}>
                     <div style={{ fontSize: 8, fontWeight: 750, color: colors.forestGreen }}>0{step.step_order}</div>
                     <div style={{ fontSize: 9, fontWeight: 600, color: colors.darkGrey, lineHeight: 1.2 }}>{step.step_name}</div>
                   </div>
@@ -35,7 +35,7 @@ export default function Methodology() {
             </div>
           </div>
 
-          <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, overflow: "hidden" }}>
+          <div className="methodology-steps-grid" style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, overflow: "hidden" }}>
             {steps.map((step, index) => {
               const run = pipeline.find((row) => row.step_code === step.step_code);
               return (
@@ -55,7 +55,7 @@ export default function Methodology() {
           </div>
         </div>
 
-        <div style={{ width: 300, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
+        <aside className="methodology-sidebar" style={{ width: 300, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
           <div style={{ background: "#fff", borderRadius: 8, padding: "10px 12px", boxShadow: "0 1px 4px rgba(0,0,0,0.07)" }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: colors.nearBlack, marginBottom: 8 }}>Tools & Technologies</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -116,7 +116,7 @@ export default function Methodology() {
               <div style={{ background: "rgba(255,255,255,0.1)", padding: 5, borderRadius: 4 }}><div style={{ fontSize: 7, color: "rgba(255,255,255,0.6)" }}>CURRENT JOBS</div><div style={{ fontSize: 9, fontWeight: 700, color: "#fff" }}>{document.views.vw_jobs.length.toLocaleString()}</div></div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

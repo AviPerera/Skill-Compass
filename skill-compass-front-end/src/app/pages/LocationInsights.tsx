@@ -40,7 +40,7 @@ function AustraliaMap({ selectedState, stateData }: { selectedState: string; sta
   };
 
   return (
-    <div style={{ display: "flex", flex: 1, gap: 8, alignItems: "center" }}>
+    <div className="australia-map-layout" style={{ display: "flex", flex: 1, gap: 8, alignItems: "center" }}>
       <svg viewBox="0 0 390 420" style={{ flex: 1, maxHeight: "100%" }}>
         {states.map(([label, x, y, width, height]) => {
           const count = countMap.get(label) ?? 0;
@@ -74,7 +74,7 @@ function AustraliaMap({ selectedState, stateData }: { selectedState: string; sta
           ))}
         </g>
       </svg>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, width: 110, flexShrink: 0 }}>
+      <div className="state-ranking" style={{ display: "flex", flexDirection: "column", gap: 4, width: 110, flexShrink: 0 }}>
         <div style={{ fontSize: 9, fontWeight: 700, color: colors.forestGreen, marginBottom: 2 }}>STATE RANKING</div>
         {stateData.map((state, index) => (
           <div key={state.name} style={{ display: "flex", justifyContent: "space-between", fontSize: 10 }}>
@@ -120,7 +120,7 @@ export default function LocationInsights() {
   const topCity = cityData[0];
 
   return (
-    <div style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="dashboard-page" style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <SlicerBar>
         <SlicerDropdown label="State" options={["All States", ...states]} value={stateFilter} onChange={setStateFilter} />
         <SlicerDropdown label="City" options={["All Cities", ...cities]} value={cityFilter} onChange={setCityFilter} />
@@ -128,15 +128,15 @@ export default function LocationInsights() {
         <SlicerDropdown label="Work Arrangement" options={["All Arrangements", ...workModes]} value={workFilter} onChange={setWorkFilter} />
       </SlicerBar>
 
-      <div style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
-        <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+      <div className="page-content" style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
+        <div className="kpi-grid" style={{ display: "flex", gap: 10, flexShrink: 0 }}>
           <KPICard label="Highest Demand State" value={topState?.name ?? "No data"} sub={topState ? `${topState.value.toLocaleString()} job ads` : undefined} accent={colors.forestGreen} />
           <KPICard label="Top City" value={topCity?.name ?? "No city recorded"} sub={topCity ? `${topCity.value.toLocaleString()} listings` : undefined} accent={colors.limeGreen} />
           <KPICard label="Remote / Hybrid Roles" value={formatPercent(remoteHybrid, jobs.length)} sub={`${remoteHybrid.toLocaleString()} positions`} accent={colors.teal} />
           <KPICard label="Full-Time Roles" value={formatPercent(fullTime?.value ?? 0, jobs.length)} sub={`${(fullTime?.value ?? 0).toLocaleString()} positions`} accent={colors.emerald} />
         </div>
 
-        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 10, overflow: "hidden" }}>
+        <div className="chart-grid location-grid" style={{ flex: 1, display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 10, overflow: "hidden" }}>
           <ChartCard title="Australia Job Demand Map" style={{ gridRow: "1 / 3" }}>
             <AustraliaMap selectedState={stateFilter} stateData={stateData} />
           </ChartCard>
@@ -146,7 +146,7 @@ export default function LocationInsights() {
           <ChartCard title="Employment Type"><DonutChart data={employmentData} size={100} /></ChartCard>
         </div>
 
-        <div style={{ flexShrink: 0 }}>
+        <div className="insight-section" style={{ flexShrink: 0 }}>
           <InsightCard bullets={[
             topState && topCity ? `${topState.name} is the leading state and ${topCity.name} is the leading city in the current filter context.` : "No locations match the current filters.",
             `${formatPercent(remoteHybrid, jobs.length)} of selected listings are classified as hybrid or remote.`,

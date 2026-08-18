@@ -154,9 +154,9 @@ export default function RoleAnalysis() {
   const topBusinessRole = countBy(jobs.filter((job) => job.business_oriented_flag === true), (job) => job.role_group_name)[0];
 
   return (
-    <div style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="dashboard-page" style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <SlicerBar>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div className="role-chip-row" style={{ display: "flex", gap: 6 }}>
           {roleChips.map(chip => (
             <SlicerChip key={chip} label={chip} selected={roleChip === chip} onClick={() => setRoleChip(chip)} />
           ))}
@@ -167,9 +167,9 @@ export default function RoleAnalysis() {
         <SlicerDropdown label="Employment" options={["All Types", ...employmentTypes]} value={empFilter} onChange={setEmpFilter} />
       </SlicerBar>
 
-      <div style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
+      <div className="page-content" style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
         {/* KPIs */}
-        <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+        <div className="kpi-grid" style={{ display: "flex", gap: 10, flexShrink: 0 }}>
           <KPICard label="Most Common Role" value={mostCommon?.name ?? "No data"} sub={mostCommon ? `${mostCommon.value.toLocaleString()} listings (${formatPercent(mostCommon.value, jobs.length)})` : undefined} accent={colors.forestGreen} />
           <KPICard label="Graduate-Level Roles" value={formatPercent(graduateCount, jobs.length)} sub={`${graduateCount.toLocaleString()} classified positions`} accent={colors.limeGreen} />
           <KPICard label="Highest Skill Variety" value={highestVariety?.name ?? "No data"} sub={highestVariety ? `Avg. ${highestVariety.value} skills required` : undefined} accent={colors.emerald} />
@@ -182,7 +182,7 @@ export default function RoleAnalysis() {
               Col 3 (row 1):    Avg. Skills Required by Role
               Col 2–3 (row 2):  Seniority Split
         */}
-        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 10, overflow: "hidden" }}>
+        <div className="chart-grid role-grid" style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 10, overflow: "hidden" }}>
 
           {/* Role × Skill Matrix — col 1, both rows */}
           <ChartCard title="Role × Skill Matrix (Demand %)" style={{ gridColumn: "1 / 2", gridRow: "1 / 3" }}>
@@ -211,7 +211,7 @@ export default function RoleAnalysis() {
 
           {/* Seniority Split — cols 2–3, row 2 */}
           <ChartCard title={`Seniority Split — ${roleChip}`} style={{ gridColumn: "2 / 4", gridRow: "2 / 3" }}>
-            <div style={{ display: "flex", gap: 16, flex: 1, alignItems: "center", overflow: "hidden" }}>
+            <div className="seniority-chart-layout" style={{ display: "flex", gap: 16, flex: 1, alignItems: "center", overflow: "hidden" }}>
               <div style={{ flex: 1, height: "100%", display: "flex" }}>
                 <RoleColChart data={senData} showLegend={false} />
               </div>
@@ -237,7 +237,7 @@ export default function RoleAnalysis() {
 
         </div>
 
-        <div style={{ flexShrink: 0 }}>
+        <div className="insight-section" style={{ flexShrink: 0 }}>
           <InsightCard bullets={[
             mostCommon ? `${mostCommon.name} is the largest role group in the current filter context with ${mostCommon.value.toLocaleString()} jobs.` : "No jobs match the current filters.",
             highestVariety ? `${highestVariety.name} has the highest observed skill variety at an average of ${highestVariety.value} distinct skills per advertisement.` : "Skill variety cannot be calculated for this selection.",

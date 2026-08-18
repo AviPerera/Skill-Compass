@@ -56,7 +56,7 @@ export default function SkillsAnalysis() {
   });
 
   return (
-    <div style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="dashboard-page" style={{ flex: 1, background: colors.lightBg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <SlicerBar>
         <SlicerDropdown label="Skill Category" options={["All Categories", ...categories]} value={catFilter} onChange={setCatFilter} />
         <SlicerDropdown label="Role Type" options={["All Roles", ...roles]} value={roleFilter} onChange={setRoleFilter} />
@@ -64,15 +64,15 @@ export default function SkillsAnalysis() {
         <SlicerDropdown label="Location" options={["All States", ...states]} value={locFilter} onChange={setLocFilter} />
       </SlicerBar>
 
-      <div style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
-        <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+      <div className="page-content" style={{ flex: 1, padding: "10px 16px", display: "flex", flexDirection: "column", gap: 10, overflow: "hidden" }}>
+        <div className="kpi-grid" style={{ display: "flex", gap: 10, flexShrink: 0 }}>
           <KPICard label="Most In-Demand Skill" value={activeDemand[0]?.name ?? "No data"} sub={activeDemand[0] ? `${activeDemand[0].value}% of ${jobs.length} jobs` : undefined} accent={colors.forestGreen} />
           <KPICard label="Top Visualisation Skill" value={topVisualisation?.name ?? "No data"} sub={topVisualisation ? `${topVisualisation.value}% of job ads` : undefined} accent={colors.limeGreen} />
           <KPICard label="Top Programming Skill" value={topProgramming?.name ?? "No data"} sub={topProgramming ? `${topProgramming.value}% of job ads` : undefined} accent={colors.emerald} />
           <KPICard label="Top Soft Skill" value={topSoftSkill?.name ?? "No data"} sub={topSoftSkill ? `${topSoftSkill.value}% of job ads` : undefined} accent={colors.teal} />
         </div>
 
-        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1.4fr", gridTemplateRows: "1fr 1fr", gap: 10, overflow: "hidden" }}>
+        <div className="chart-grid skills-grid" style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1.4fr", gridTemplateRows: "1fr 1fr", gap: 10, overflow: "hidden" }}>
           <ChartCard title="Technical & Business Skills — Demand %" style={{ gridRow: "1 / 2" }}>
             <HBarList data={technicalSkills} />
           </ChartCard>
@@ -95,7 +95,7 @@ export default function SkillsAnalysis() {
           </ChartCard>
         </div>
 
-        <div style={{ flexShrink: 0 }}>
+        <div className="insight-section" style={{ flexShrink: 0 }}>
           <InsightCard bullets={[
             activeDemand[0] ? `${activeDemand[0].name} is the leading requirement, appearing in ${activeDemand[0].value}% of the selected job advertisements.` : "No skills match the current filters.",
             topVisualisation ? `${topVisualisation.name} leads the governed Business Intelligence and Visualisation category.` : "No visualisation skill is present in this filter context.",

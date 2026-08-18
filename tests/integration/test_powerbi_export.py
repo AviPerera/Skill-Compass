@@ -6,8 +6,9 @@ external services, write a database, or copy synthetic reference fact values.
 
 from __future__ import annotations
 
+import csv
 import shutil
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree
@@ -109,6 +110,22 @@ def _json_comparable(value: object, power_bi_type: str) -> object:
     if isinstance(value, date):
         return value.isoformat()
     return value
+
+
+def _set_scraped_times(cleaned_path: Path, timestamps: tuple[str, ...]) -> None:
+    """Set deterministic source timestamps without changing shared fixtures."""
+    with cleaned_path.open(encoding="utf-8", newline="") as source:
+        reader = csv.DictReader(source)
+        rows = list(reader)
+        fieldnames = reader.fieldnames
+    assert fieldnames is not None
+    assert len(rows) == len(timestamps)
+    for row, timestamp in zip(rows, timestamps, strict=True):
+        row["scraped_at"] = timestamp
+    with cleaned_path.open("w", encoding="utf-8", newline="") as destination:
+        writer = csv.DictWriter(destination, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def test_export_writes_one_json_then_matching_excel_contract(tmp_path: Path) -> None:
@@ -224,6 +241,30 @@ def test_repeated_feature_9_export_has_deterministic_json(tmp_path: Path) -> Non
 
     assert first.json_path.read_bytes() == second.json_path.read_bytes()
     assert first.view_row_counts == second.view_row_counts
+
+
+def test_export_uses_source_snapshot_time_not_processing_time(tmp_path: Path) -> None:
+    input_dir = tmp_path / "processed"
+    _prepare_upstream(input_dir)
+    expected = datetime(2026, 8, 12, 19, 22, 7, tzinfo=UTC)
+    _set_scraped_times(
+        input_dir / "cleaned_jobs.csv",
+        (
+            "2026-08-12T19:04:24+00:00",
+            expected.isoformat(),
+            "2026-08-12T19:10:00+00:00",
+            "2026-08-12T19:15:00+00:00",
+        ),
+    )
+
+    result = _export(input_dir, tmp_path / "powerbi")
+    document = read_powerbi_json(result.json_path)
+
+    assert result.data_as_of_at == expected
+    assert document.data_as_of_at == expected.isoformat()
+    assert {
+        row["data_as_of_at"] for row in document.views["vw_dim_analysis_period"]
+    } == {expected.isoformat()}
 
 
 def test_export_powerbi_cli_reports_safe_reconciliation(

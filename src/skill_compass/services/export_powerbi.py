@@ -224,19 +224,19 @@ def _build_context(
     cleaned_all = _index(inputs.cleaned_jobs, "cleaned job")
     included_jobs = tuple(sorted(inputs.job_facts, key=_identity))
     cleaned = {key: cleaned_all[key] for key in map(_identity, included_jobs)}
-    processed_times = [
-        _utc(classification.classified_at)
-        for classification in inputs.relevance_classifications
+    source_snapshot_times = [
+        _utc(job.scraped_at) for job in inputs.cleaned_jobs if job.scraped_at
     ]
-    if not processed_times:
-        processed_times = [
-            _utc(job.scraped_at) for job in inputs.cleaned_jobs if job.scraped_at
+    if not source_snapshot_times:
+        source_snapshot_times = [
+            _utc(classification.classified_at)
+            for classification in inputs.relevance_classifications
         ]
-    if not processed_times:
+    if not source_snapshot_times:
         raise PowerBiContractError(
-            "Power BI export requires a deterministic processed or scraped timestamp"
+            "Power BI export requires a deterministic scraped or processed timestamp"
         )
-    data_as_of = max(processed_times)
+    data_as_of = max(source_snapshot_times)
     listing_dates = tuple(
         job.listing_date for job in cleaned.values() if job.listing_date is not None
     )

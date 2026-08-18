@@ -1,378 +1,484 @@
 # Skill Compass
 
-Navigating Australia's Data Analytics Job Market Through Skill Intelligence
+**Navigating Australia’s Data Analytics Job Market Through Skill Intelligence**
 
-## Current status
+Skill Compass is a university capstone project that turns Australian job-advertisement data into structured, explainable insights about skills, roles, seniority, locations, work arrangements and employment types.
 
-The current implementation provides the reproducible Python environment and
-importable package baseline plus Feature 2 JSONL/CSV source mapping and
-deterministic cleaning. The consolidated `national_jobs_raw.jsonl` is the
-primary national processing input. Feature 3 adds deterministic,
-evidence-preserving requirement and skill extraction from typed Feature 2
-cleaned records. Feature 5 adds deterministic, configuration-driven role
-classification with bounded evidence, confidence strengths, and explicit
-`Other` and `Review` outcomes. Features 6 and 7 add governed seniority and
-profile-relevance classifications. Feature 8 joins those local outputs into
-privacy-safe, channel-neutral analytics and provides a 22-artifact static
-dashboard demonstration.
+## Phase 2 status: complete
 
-Feature 4A adds an explicit, five-item-safe Apify connection test and
-conservative result-cap assessment. It does not add national or scheduled
-collection.
+Phase 2 is complete. The final repository contains a reusable Python processing package, the governed national analysis outputs, a Power BI-compatible presentation export, and a React dashboard that presents the final results.
 
-## Local development
+Final national run — data as of **13 August 2026**:
 
-Install Python 3.12 and [uv](https://docs.astral.sh/uv/). Create the local
-environment and install the project with its development dependencies:
+| Stage | Result |
+| --- | ---: |
+| Raw occurrences collected | 3,088 |
+| Unique canonical jobs | 3,028 |
+| Cross-scope overlaps removed | 60 |
+| Jobs included in the final governed analysis | 748 |
+| Jobs excluded | 1,243 |
+| Jobs retained for review | 1,037 |
+| Power BI presentation views | 26 |
 
-```shell
+> **Important:** the 748 jobs are the final governed analytical population. The 3,028 jobs are the unique canonical records used for pipeline reconciliation.
+
+---
+
+## What is included
+
+Phase 2 is implemented as nine main repository features:
+
+| Feature | Capability | What it does |
+| --- | --- | --- |
+| **1** | Environment baseline | Provides a reproducible Python 3.12 project with locked dependencies, tests and Ruff checks. |
+| **2** | Mapping and cleaning | Converts raw source fields into a stable canonical schema, cleans records and reconciles duplicates/rejections. |
+| **3** | Requirement extraction | Extracts governed skills and job requirements from title, summary, bullet points and descriptions while retaining evidence. |
+| **4** | National collection | Supports Apify connection testing, existing-dataset retrieval and the controlled 66-scope national collection. |
+| **5** | Role classification | Classifies jobs into governed role groups while retaining `Other` and `Review` when evidence is insufficient. |
+| **6** | Seniority classification | Classifies Entry-level, Junior, Mid-level and Senior roles while preserving `Unknown` and `Review` outcomes. |
+| **7** | Profile relevance | Separates jobs into `Included`, `Excluded` and `Review` so dashboard insights use a defensible denominator. |
+| **8** | Analytics outputs | Produces skill demand, role-specific demand, geography, employment, work-mode and skill-combination analytics. |
+| **9** | Power BI export | Builds the governed 26-view presentation contract as JSON and Excel for Power BI and downstream presentation use. |
+
+The central design principle is **configuration over code**. Source-specific fields and Data Analytics-specific rules are kept outside the reusable Python engine.
+
+---
+
+# Quick start
+
+There are two ways to use the repository:
+
+1. **Run the dashboard only** — fastest option; no Python processing is required.
+2. **Run the Python package** — reproduce the processing workflow from source data and regenerate the analytical outputs.
+
+---
+
+# Option 1 — Run the dashboard only
+
+The React dashboard can run independently from the Python package. The repository already contains the prepared dashboard data required by the frontend.
+
+## Requirements
+
+- Node.js **20 or newer**
+- npm, which is included with Node.js
+- pnpm 10+ is optional
+
+## Start the dashboard
+
+From the repository root:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open the address printed by Vite, normally:
+
+```text
+http://localhost:5173
+```
+
+The dashboard contains six pages:
+
+- Executive Summary
+- Skills Analysis
+- Role Analysis
+- Location Insights
+- Graduate Roadmap
+- Methodology
+
+## Frontend data flow
+
+```text
+Skill Compass Python outputs
+        ↓
+frontend/data/dashboard-data.json
+        ↓
+React filtering and aggregation
+        ↓
+Six-page dashboard
+```
+
+The dashboard can therefore be opened and explored **without rerunning the Python pipeline**.
+
+## Useful frontend commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local development server |
+| `npm run typecheck` | Check the TypeScript source |
+| `npm run build` | Type-check and create the production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run data:build` | Regenerate `dashboard-data.json` from the latest Feature 9 export |
+
+If you prefer pnpm:
+
+```powershell
+pnpm install
+pnpm dev
+```
+
+---
+
+# Option 2 — Run the Python package
+
+Use this option if you want to reproduce the analysis, process another dataset, or adapt Skill Compass to another job-market field.
+
+## Requirements
+
+- Python **3.12**
+- [uv](https://docs.astral.sh/uv/)
+- An Apify token only if you want to collect/fetch live source data
+
+## 1. Install the project
+
+From the repository root:
+
+```powershell
 uv sync
 ```
 
-Run the tests and Ruff checks with:
+Verify the package:
 
-```shell
+```powershell
+uv run python -c "import skill_compass; print(skill_compass.__version__)"
+```
+
+Run the quality checks:
+
+```powershell
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .
 ```
 
-Verify the installed package and version with:
+---
 
-```shell
-uv run python -c "import skill_compass; print(skill_compass.__version__)"
+## 2. Configure Apify only if collecting data
+
+Copy the environment template:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-## National processing workflow (no Actor invocation)
+Add your token to `.env`:
 
-After the one-time collection or existing-dataset fetch has created a private
-`national_jobs_raw.jsonl`, process that existing local file through Feature 2:
-
-```shell
-uv run skill-compass clean-jsonl --input data/private/collections/full/<BACKFILL_ID>/national_jobs_raw.jsonl --mapping sources/apify_seek_current/source_mapping.yaml --output-dir data/processed/national
+```text
+APIFY_TOKEN=your_token_here
 ```
 
-The JSONL adapter reads UTF-8 JSON objects, flattens nested object and array
-paths into the versioned source-mapping contract, and then uses the same
-canonical mapping, deduplication, cleaning, quality, and output logic as the CSV
-adapter. It never starts or reruns an Apify Actor.
+Never commit `.env` or your API token.
 
-Run the implemented Feature 3 extraction stage against the resulting national
-cleaned data:
+Test the connection with the bounded five-item connection test:
 
-```shell
-uv run skill-compass extract-requirements --input data/processed/national/cleaned_jobs.csv --profile profiles/data_analytics/profile.yaml --dictionary profiles/data_analytics/requirements.csv --output-dir data/processed/national/skill_extraction
-```
-
-Run the implemented Feature 5 role-classification stage against the same
-canonical cleaned data:
-
-```shell
-uv run skill-compass classify-roles --input data/processed/national/cleaned_jobs.csv --rules profiles/data_analytics/role_rules.yaml --output-dir data/processed/national/role_classification
-```
-
-Keep the raw national input and every generated output local and ignored.
-
-## Feature 2: CSV demonstration compatibility
-
-Keep the private demonstration input locally at
-`data/private/adelaide_146_jobs_raw.csv`. Never commit private source data.
-
-Run the reusable CSV boundary command with:
-
-```shell
-uv run skill-compass clean-csv --input data/private/adelaide_146_jobs_raw.csv --mapping sources/apify_seek_current/source_mapping.yaml --output-dir data/processed/demo_2
-```
-
-Run the temporary Demo 2 presentation with:
-
-```shell
-uv run python scripts/demo_2_cleaning.py
-```
-
-The generated local output directory contains:
-
-- `mapped_jobs.csv`
-- `cleaned_jobs.csv`
-- `rejected_jobs.csv`
-- `data_quality_summary.csv`
-
-CSV remains available for the private 146-row demonstration and sanitised test
-fixtures. National processing uses the JSONL command above. PostgreSQL
-integration follows in a later controlled work item; it is not implemented
-here.
-
-## Feature 3: requirement and skill extraction
-
-The versioned Data Analytics requirement dictionary is at
-`profiles/data_analytics/requirements.csv`. Matching is deterministic,
-section-aware and boundary-controlled, and every accepted occurrence retains a
-short reviewable evidence snippet.
-
-Run the reusable extraction boundary with:
-
-```shell
-uv run skill-compass extract-requirements --input data/processed/demo_2/cleaned_jobs.csv --profile profiles/data_analytics/profile.yaml --dictionary profiles/data_analytics/requirements.csv --output-dir data/processed/demo_2/skill_extraction
-```
-
-Run the temporary live demonstration with:
-
-```shell
-uv run python scripts/demo_2_skill_extraction.py
-```
-
-The generated extraction directory contains:
-
-- `job_requirement_matches.csv`
-- `requirement_evidence.csv`
-- `job_extraction_summary.csv`
-- `skill_demand_summary.csv`
-- `extraction_quality_summary.csv`
-- `charts/top_15_skills_by_job_count.png`
-- `charts/skills_per_job_distribution.png`
-
-PostgreSQL persistence follows in a later controlled feature. Keep private
-inputs and all generated outputs local and ignored; do not commit them.
-
-## Feature 5: explainable role classification
-
-The governed Data Analytics role rules are at
-`profiles/data_analytics/role_rules.yaml`. The reusable classifier consumes only
-typed Feature 2 fields, bounds repeated evidence, retains rule versions and a
-SHA-256 configuration hash, and never makes a network request. The five
-dashboard roles are Data Analyst, Business Analyst, BI Analyst, Reporting
-Analyst, and Data Scientist; uncertain or non-matching jobs remain visible as
-`Review` or `Other`.
-
-Run the reusable classification boundary with:
-
-```shell
-uv run skill-compass classify-roles --input data/processed/demo_2/cleaned_jobs.csv --rules profiles/data_analytics/role_rules.yaml --output-dir data/processed/demo_2/role_classification
-```
-
-Run the national local-only demonstration with:
-
-```shell
-uv run python scripts/demo_feature_5_role_classification.py
-```
-
-The generated role-classification directory contains:
-
-- `job_role_classifications.csv`
-- `role_classification_evidence.csv`
-- `role_distribution_summary.csv`
-- `role_classification_quality.csv`
-- `review_queue.csv`
-- `role_distribution.png`
-- `role_confidence_distribution.png`
-
-The confidence values are deterministic strengths, not statistical
-probabilities or measured accuracy. Seniority and profile-relevance
-classification are not part of Feature 5.
-
-## Feature 6: explainable seniority classification
-
-The governed seniority rules are at
-`profiles/data_analytics/seniority_rules.yaml`. The classifier consumes only
-typed Feature 2 cleaned fields and uses title markers, bounded responsibility
-phrases, years-of-experience evidence, and canonical employment hints. Its
-approved dashboard order is Entry-level, Junior, Mid-level, and Senior.
-Insufficient evidence remains `Unknown`; ambiguous or materially conflicting
-evidence enters `Review`. The graduate-level flag is true only for Entry-level
-and Junior outcomes.
-
-Run the reusable local classification boundary with:
-
-```shell
-uv run skill-compass classify-seniority --input data/processed/national/cleaned_jobs.csv --rules profiles/data_analytics/seniority_rules.yaml --output-dir data/processed/national/seniority_classification
-```
-
-Run the national local-only demonstration with:
-
-```shell
-uv run python scripts/demo_feature_6_seniority_classification.py
-```
-
-The generated seniority-classification directory contains:
-
-- `job_seniority_classifications.csv`
-- `seniority_classification_evidence.csv`
-- `seniority_distribution_summary.csv`
-- `seniority_classification_quality.csv`
-- `seniority_review_queue.csv`
-- `seniority_distribution.png`
-- `seniority_confidence_distribution.png`
-
-Confidence values are deterministic evidence strengths, not probabilities or
-measured accuracy. The command does not call an Actor, make an external API
-request, write to a database, or change role and relevance classifications.
-
-## Feature 8: channel-neutral analytics and dashboard visual demo
-
-Feature 8 joins the existing canonical cleaned, requirement, role, seniority,
-and relevance outputs by `source_code + source_job_id`. It exports distinct-job
-measures, governed role and seniority summaries, location and employment
-distributions, and skill pair/triple metrics without descriptions, evidence,
-contacts, or tracking values.
-
-Build only the reusable analytics outputs with:
-
-```shell
-uv run skill-compass build-analytics --input data/processed/national --output-dir data/processed/national/analytics
-```
-
-Generate the complete six-page, 22-artifact static dashboard demonstration with:
-
-```shell
-uv run python scripts/demo_dashboard_visuals.py
-```
-
-The demo writes analytics CSV/JSON files, page-grouped PNGs, and
-`dashboard_visual_manifest.json` below the ignored local directory
-`data/processed/national/dashboard_demo/`. Pages 1–4 and the skill-combination
-visual on page 5 use Feature 8 national analytics. The page 5 priority matrix
-and learning stages are explicitly labelled synthetic/provisional because the
-approved production weighting and difficulty contract has not yet been
-implemented. Page 6 describes the implemented local workflow.
-
-Both commands are local-only: they make no external API request, write no
-database objects, and do not create or modify a Power BI file. PostgreSQL,
-Alembic migrations, `pbi.vw_*` contracts, and interactive Power BI behaviour
-remain later controlled work items.
-
-## Feature 9: Power BI contract and live export
-
-Feature 9 translates the existing governed Features 2–8 outputs into the
-frozen 26-view Power BI contract. It writes one canonical JSON document first
-and converts only that JSON document into an Excel workbook matching the
-tracked synthetic reference workbook's table names, 314 columns, semantic
-types, relationships and sheet structure.
-
-Run the local live export with:
-
-```shell
-uv run skill-compass export-powerbi --input data/processed/national --output-dir data/processed/national/powerbi
-```
-
-The command writes:
-
-- `skill_compass_powerbi_live.json` — the single canonical export source,
-  including contract metadata and all 26 view collections.
-- `skill_compass_powerbi_live.xlsx` — the JSON-to-Excel conversion with the
-  matching named tables, column order, typed values and live row counts.
-
-Identifiers required by the future PostgreSQL contract use deterministic
-UUIDv5 values. Feature 8's governed role-scoped skill combinations are
-included. `vw_pathway_skill_priorities` and `vw_roadmap_stages` intentionally
-remain empty until their production rules are governed; the workbook retains
-their exact headers and named tables. The export contains no descriptions,
-evidence snippets, contacts or tracking values and makes no external request,
-database write or `.pbix` change.
-
-## Feature 4A: Apify connection test
-
-Copy `.env.example` to a local `.env` and set `APIFY_TOKEN`. The `.env` file is
-ignored and must never be committed. Then run the deliberately bounded test:
-
-```shell
+```powershell
 uv run skill-compass test-apify-connection
 ```
 
-The command resolves `scrapersdelight/seek-jobs-scraper`, requests at most five
-test-scope results using the checked-in connection configuration, waits
-for completion, and reports only run metadata and counts. It does not print raw
-listings or invoke mapping, cleaning, extraction, classification, or analysis.
+---
 
-The warning threshold is 500. A count at or above that threshold reports
-`CAP_RISK`, not proven truncation. `CONFIRMED_TRUNCATED` requires explicit,
-verified Actor/source metadata showing that more matches existed than were
-retrieved.
+## 3. Run a new national collection
 
-## Feature 4B: fetch an existing Apify dataset
+First inspect the planned collection without making a paid request:
 
-Retrieve an existing dataset without starting or rerunning its Actor:
-
-```shell
-uv run skill-compass fetch-apify --dataset-id DATASET_ID
-```
-
-Alternatively, resolve a completed run's default dataset and fetch it:
-
-```shell
-uv run skill-compass fetch-apify --run-id RUN_ID
-```
-
-The command uses Apify's paginated dataset iterator and writes raw `items.jsonl`
-plus `fetch_manifest.json` below `data/private/collections/fetched/`. These
-private outputs are ignored by Git. Fetching does not invoke an Actor or run
-mapping, cleaning, extraction, classification, or analysis.
-
-Fetch and concatenate every existing dataset referenced by a private national
-backfill manifest without invoking an Actor:
-
-```shell
-uv run python scripts/fetch_full_backfill.py --manifest data/private/collection_manifests/full_backfill_sources.csv --dry-run
-uv run python scripts/fetch_full_backfill.py --manifest data/private/collection_manifests/full_backfill_sources.csv
-```
-
-The equivalent installed command is `uv run skill-compass fetch-backfill` with
-the same options. Successful scope files are skipped on rerun; `--force`
-deliberately re-fetches them. The national JSONL preserves every raw occurrence
-in configured scope order. Duplicate detection and survivor selection remain a
-Feature 2 responsibility.
-
-To append datasets from every other successful existing run of the configured
-`scrapersdelight/seek-jobs-scraper` Actor, use the explicit discovery flag:
-
-```shell
-uv run skill-compass fetch-backfill --include-all-successful-runs
-```
-
-Discovery uses the SDK's paginated successful-run iterator and never starts or
-calls the Actor. This mode does not require or validate the private 66-scope
-manifest. Every distinct dataset discovered from a successful Actor run is
-written below `supplemental/`, its provenance is recorded in
-`supplemental_results.csv`, and every raw occurrence is concatenated into
-`national_jobs_raw.jsonl`. The fetch is `COMPLETE` when discovery succeeds and
-all discovered datasets are fetched successfully.
-
-Run the live Feature 4 demonstration with:
-
-```shell
-uv run python scripts/demo_feature_4.py
-```
-
-The demonstration authenticates with `APIFY_TOKEN`, discovers existing
-successful runs, retrieves their datasets, reconciles the combined raw JSONL,
-and prints dataset, search-scope, cap-risk, and raw-listing summaries. State
-counts are derived only from each run's original Actor `INPUT.location` when it
-exactly matches a configured SEEK search location. Individual job locations are
-not cleaned or normalised, duplicate occurrences remain present, and Feature 2
-is not started. Reruns skip successful local datasets unless `--force` is used.
-
-## Feature 4C: one-time full national collection
-
-Review the derived 66-scope national plan without making any Apify request:
-
-```shell
+```powershell
 uv run python scripts/run_full_collection.py --dry-run
 ```
 
-After reviewing the plan, explicitly start the sequential paid backfill with:
+When the plan is correct, start the one-time collection:
 
-```shell
+```powershell
 uv run python scripts/run_full_collection.py --execute
 ```
 
-If an incomplete backfill exists, resume it without rerunning successful scopes:
+If a previous backfill stopped before completion:
 
-```shell
+```powershell
 uv run python scripts/run_full_collection.py --execute --resume
 ```
 
-A completed backfill blocks another full execution. `--force` deliberately
-creates a new backfill directory and should be used only when another paid
-historical collection is intended. Raw scope files, audit manifests, provenance,
-and the consolidated national JSONL remain below the ignored
-`data/private/collections/full/` directory. Collection never runs through the
-processing or demo commands.
+> **Cost warning:** the full collection invokes the configured Apify Actor and can consume paid Apify usage. Always use `--dry-run` first.
+
+The completed backfill creates a consolidated file similar to:
+
+```text
+data/private/collections/full/<BACKFILL_ID>/national_jobs_raw.jsonl
+```
+
+Private collection data should remain local and ignored by Git.
+
+---
+
+## 4. Map and clean the national data — Feature 2
+
+```powershell
+uv run skill-compass clean-jsonl `
+  --input data/private/collections/full/<BACKFILL_ID>/national_jobs_raw.jsonl `
+  --mapping sources/apify_seek_current/source_mapping.yaml `
+  --output-dir data/processed/national
+```
+
+Main outputs:
+
+```text
+data/processed/national/
+├── mapped_jobs.csv
+├── cleaned_jobs.csv
+├── rejected_jobs.csv
+└── data_quality_summary.csv
+```
+
+The final national run reconciled:
+
+```text
+3,028 input records = 3,028 cleaned + 0 rejected
+```
+
+---
+
+## 5. Extract skills and requirements — Feature 3
+
+```powershell
+uv run skill-compass extract-requirements `
+  --input data/processed/national/cleaned_jobs.csv `
+  --profile profiles/data_analytics/profile.yaml `
+  --dictionary profiles/data_analytics/requirements.csv `
+  --output-dir data/processed/national/skill_extraction
+```
+
+This stage uses the governed requirement dictionary and retains reviewable evidence for matched requirements.
+
+---
+
+## 6. Classify roles — Feature 5
+
+```powershell
+uv run skill-compass classify-roles `
+  --input data/processed/national/cleaned_jobs.csv `
+  --rules profiles/data_analytics/role_rules.yaml `
+  --output-dir data/processed/national/role_classification
+```
+
+---
+
+## 7. Classify seniority — Feature 6
+
+```powershell
+uv run skill-compass classify-seniority `
+  --input data/processed/national/cleaned_jobs.csv `
+  --rules profiles/data_analytics/seniority_rules.yaml `
+  --output-dir data/processed/national/seniority_classification
+```
+
+---
+
+## 8. Run profile relevance — Feature 7
+
+Feature 7 creates the `Included`, `Excluded` and `Review` analytical population used by Feature 8 and the dashboard.
+
+The older README did not document the exact Feature 7 CLI command. Before publishing or changing this section, confirm the command exposed by the current package with:
+
+```powershell
+uv run skill-compass --help
+```
+
+Run the profile-relevance command before continuing to Feature 8.
+
+---
+
+## 9. Build the final analytics — Feature 8
+
+```powershell
+uv run skill-compass build-analytics `
+  --input data/processed/national `
+  --output-dir data/processed/national/analytics
+```
+
+Feature 8 combines the cleaned, extraction, role, seniority and relevance outputs into channel-neutral analytical results.
+
+---
+
+## 10. Build the Power BI presentation export — Feature 9
+
+```powershell
+uv run skill-compass export-powerbi `
+  --input data/processed/national `
+  --output-dir data/processed/national/powerbi
+```
+
+Main outputs:
+
+```text
+data/processed/national/powerbi/
+├── skill_compass_powerbi_live.json
+└── skill_compass_powerbi_live.xlsx
+```
+
+The export reproduces the governed Power BI contract, including the expected table names, columns and semantic structure.
+
+After generating a new Feature 9 export, refresh the frontend dataset with:
+
+```powershell
+cd frontend
+npm run data:build
+```
+
+Then start the dashboard again:
+
+```powershell
+npm run dev
+```
+
+---
+
+# Adapt Skill Compass to another job field
+
+You should **not need to rewrite the core Python package** for a compatible occupation/domain.
+
+For example, to adapt the project from Data Analytics to Accounting, Cybersecurity or another field, copy the existing profile folder and edit the configuration files below.
+
+## Configuration files to change
+
+| File | Change this when... |
+| --- | --- |
+| `profiles/data_analytics/profile.yaml` | Changing the occupation profile, profile metadata, active categories or inclusion settings. |
+| `profiles/data_analytics/requirements.csv` | Changing the skills, tools, qualifications, aliases and requirement categories to extract. |
+| `profiles/data_analytics/role_rules.yaml` | Changing the role groups and the evidence/rules used to classify them. |
+| `profiles/data_analytics/seniority_rules.yaml` | Changing seniority labels, title markers, experience rules or review logic. |
+| `profiles/data_analytics/pathway_rules.yaml` | Changing career pathways, roadmap priorities or pathway-specific rules. |
+| `sources/apify_seek_current/source_mapping.yaml` | **Only** when the source/Actor or source field names change. |
+
+Recommended approach:
+
+```text
+profiles/
+├── data_analytics/
+│   ├── profile.yaml
+│   ├── requirements.csv
+│   ├── role_rules.yaml
+│   ├── seniority_rules.yaml
+│   └── pathway_rules.yaml
+└── your_new_profile/
+    ├── profile.yaml
+    ├── requirements.csv
+    ├── role_rules.yaml
+    ├── seniority_rules.yaml
+    └── pathway_rules.yaml
+```
+
+### If the source stays the same
+
+If you continue using the same SEEK/Apify source structure, keep:
+
+```text
+sources/apify_seek_current/source_mapping.yaml
+```
+
+unchanged.
+
+### If the source changes
+
+Create or update a source mapping so the new source fields are translated into the same canonical fields:
+
+```text
+sources/<your_source>/source_mapping.yaml
+```
+
+The central cleaning, extraction, classification and analytics modules should remain unchanged for compatible sources and domains.
+
+---
+
+# Repository structure
+
+```text
+skill-compass/
+├── frontend/                       # React + Vite dashboard
+│   ├── data/
+│   │   └── dashboard-data.json
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── profiles/
+│   └── data_analytics/             # Domain configuration
+│
+├── sources/
+│   └── apify_seek_current/         # Source field mapping
+│
+├── src/
+│   └── skill_compass/              # Reusable Python package
+│       ├── collection/
+│       ├── mapping/
+│       ├── cleaning/
+│       ├── extraction/
+│       ├── classification/
+│       ├── analytics/
+│       └── exports/
+│
+├── scripts/                        # Collection and demonstration runners
+├── tests/                          # Unit, integration and data-quality tests
+├── data/
+│   ├── private/                    # Private/raw source data — ignored
+│   └── processed/                  # Generated processing outputs
+├── powerbi/                        # Power BI files/contracts
+├── docs/                           # Architecture, methodology and project documentation
+├── pyproject.toml
+├── uv.lock
+└── README.md
+```
+
+---
+
+# Data and privacy notes
+
+- Do not commit `.env`, API tokens or private source datasets.
+- Raw job descriptions, contact information and tracking fields should not be exposed through the dashboard data contract.
+- Skill Compass analyses **advertised job-market demand**. It does not represent every Australian vacancy or the hidden job market.
+- `Unknown`, `Other` and `Review` outcomes are intentionally retained when evidence is insufficient instead of forcing a classification.
+
+---
+
+# Current dashboard notes
+
+The frontend consumes the governed Feature 9 presentation export through a static JSON contract.
+
+The Graduate Roadmap remains intentionally partial where governed pathway-priority or learning-stage rules are unavailable. The application should show an unavailable state rather than inventing recommendations.
+
+---
+
+# Development commands summary
+
+## Python
+
+```powershell
+uv sync
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run skill-compass --help
+```
+
+## Dashboard
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+## Rebuild dashboard data
+
+```powershell
+cd frontend
+npm run data:build
+```
+
+---
+
+## Project scope
+
+Skill Compass was developed as a university Data Analytics capstone project. Phase 2 focused on delivering a reproducible analytics pipeline and presentation layer using real Australian job-advertisement data.
+
+The repository is designed so the analytical engine, configuration and presentation layers remain separated, making the project easier to maintain, reproduce and adapt.

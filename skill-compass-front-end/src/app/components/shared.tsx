@@ -1,4 +1,5 @@
 import React from "react";
+import aiaLogo from "../../assets/aia-logo.png";
 
 // Color palette
 export const colors = {
@@ -275,8 +276,15 @@ export function ReportHeader({ pageTitle, currentPage, onPageChange, dataAsOf, t
             boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
           }}
         >
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.04em", lineHeight: 1.2 }}>
-            UNIVERSITY CAPSTONE PROJECT
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 800, letterSpacing: "0.04em", lineHeight: 1.2 }}>
+            <img
+              src={aiaLogo}
+              alt="Analytics Institute of Australia logo"
+              width="13"
+              height="13"
+              style={{ width: 13, height: 13, objectFit: "contain", flexShrink: 0 }}
+            />
+            <span>ANALYTICS INSTITUTE OF AUSTRALIA PROJECT</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2, fontSize: 10, fontWeight: 600, lineHeight: 1.2 }}>
             <svg
